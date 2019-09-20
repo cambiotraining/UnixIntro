@@ -1376,7 +1376,7 @@ Oftentimes one needs to copy or move several files at once. This can be done by 
 
 > ## More on Wildcards
 >
-> Look into the `exp` directory in `~/data-shell/exp` that has the following structure:
+> Look into the `exp` directory in `~/Desktop/data-shell/data/exp` that has the following structure:
 >
 > ~~~
 > exp
