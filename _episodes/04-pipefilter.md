@@ -428,6 +428,23 @@ The redirection and pipes used in the last few commands are illustrated below:
 > {: .solution}
 {: .challenge}
 
+> ## An example pipeline: Checking Files
+>
+> There are 17 files from an assay in the `~/Desktop/data-shell/north-pacific-gyre/2012-07-03` directory 
+> Suppose you want to do some quick sanity checks on the content of the files. You know that files > are supposed to have 300 lines.
+>
+> Starting by moving to that directory,
+>
+> 1. How would you check if there are any files with fewer than 300 lines in the directory?
+> 2. How would you check if there are any files with more than 300 lines in the directory?
+>
+>
+> > ## Solution
+> > 1. `wc -l *.txt | sort -n | head -n 5`. You can report the number of lines of all the
+> > text files in the directory, sort them, and then get the 
+> > 2. `wc -l *.txt | sort -n | tail -n 5`. Same as above but now we want the files 
+> {: .solution}
+{: .challenge}
 
 This idea of linking programs together is why Unix has been so successful.
 Instead of creating enormous programs that try to do many different things,
@@ -527,6 +544,14 @@ so that you and other people can put those programs into pipes to multiply their
 > {: .solution}
 {: .challenge}
 
+> ## Awk: a more powerful tool for text processing
+>
+> We have seen the `cut` command that allows the selection of columns in tabular data.
+> If you need more powerful manipulation of tabular data you can use the command `awk`, which
+> permits more powerful operations (selection, calculations etc.) on columns. For more complex
+> operations, however, we recommend going to your favourite programming language!
+{: .callout}
+
 > ## Which Pipe?
 >
 > The file `animals.txt` contains 8 lines of data formatted as follows:
@@ -558,152 +583,29 @@ so that you and other people can put those programs into pipes to multiply their
 > {: .solution}
 {: .challenge}
 
-## Nelle's Pipeline: Checking Files
-
-Nelle has run her samples through the assay machines
-and created 17 files in the `north-pacific-gyre/2012-07-03` directory described earlier.
-As a quick sanity check, starting from her home directory, Nelle types:
-
-~~~
-$ cd north-pacific-gyre/2012-07-03
-$ wc -l *.txt
-~~~
-{: .language-bash}
-
-The output is 18 lines that look like this:
-
-~~~
-300 NENE01729A.txt
-300 NENE01729B.txt
-300 NENE01736A.txt
-300 NENE01751A.txt
-300 NENE01751B.txt
-300 NENE01812A.txt
-... ...
-~~~
-{: .output}
-
-Now she types this:
-
-~~~
-$ wc -l *.txt | sort -n | head -n 5
-~~~
-{: .language-bash}
-
-~~~
- 240 NENE02018B.txt
- 300 NENE01729A.txt
- 300 NENE01729B.txt
- 300 NENE01736A.txt
- 300 NENE01751A.txt
-~~~
-{: .output}
-
-Whoops: one of the files is 60 lines shorter than the others.
-When she goes back and checks it,
-she sees that she did that assay at 8:00 on a Monday morning --- someone
-was probably in using the machine on the weekend,
-and she forgot to reset it.
-Before re-running that sample,
-she checks to see if any files have too much data:
-
-~~~
-$ wc -l *.txt | sort -n | tail -n 5
-~~~
-{: .language-bash}
-
-~~~
- 300 NENE02040B.txt
- 300 NENE02040Z.txt
- 300 NENE02043A.txt
- 300 NENE02043B.txt
-5040 total
-~~~
-{: .output}
-
-Those numbers look good --- but what's that 'Z' doing there in the third-to-last line?
-All of her samples should be marked 'A' or 'B';
-by convention,
-her lab uses 'Z' to indicate samples with missing information.
-To find others like it, she does this:
-
-~~~
-$ ls *Z.txt
-~~~
-{: .language-bash}
-
-~~~
-NENE01971Z.txt    NENE02040Z.txt
-~~~
-{: .output}
-
-Sure enough,
-when she checks the log on her laptop,
-there's no depth recorded for either of those samples.
-Since it's too late to get the information any other way,
-she must exclude those two files from her analysis.
-She could just delete them using `rm`,
-but there are actually some analyses she might do later where depth doesn't matter,
-so instead, she'll just be careful later on to select files using the wildcard expression `*[AB].txt`.
-As always,
-the `*` matches any number of characters;
-the expression `[AB]` matches either an 'A' or a 'B',
-so this matches all the valid data files she has.
-
-> ## Wildcard Expressions
+> ## Filtering by patterns
+> `grep` is another command that searches for patterns in text. Patterns could be simple 
+> text or a combination of text and the wildcard characters we have seen before like ? and *. Like > other commands we have seen `grep` can be used on multiple files. 
+> For example if we wanted to find all occurences of name in all the text files we could write:
 >
-> Wildcard expressions can be very complex, but you can sometimes write
-> them in ways that only use simple syntax, at the expense of being a bit
-> more verbose.
-> Consider the directory `data-shell/north-pacific-gyre/2012-07-03` :
-> the wildcard expression `*[AB].txt`
-> matches all files ending in `A.txt` or `B.txt`. Imagine you forgot about
-> this.
+> ```
+> $ grep "name" *.txt
+> ```
+> {: .language-bash}
 >
-> 1.  Can you match the same set of files with basic wildcard expressions
->     that do not use the `[]` syntax? *Hint*: You may need more than one
->     expression.
 >
-> 2.  The expression that you found and the expression from the lesson match the
->     same set of files in this example. What is the small difference between the
->     outputs?
+> Using the `animals.txt` file suppose we wanted to copy all the rabbit dates to a separate file `rabbit-dates.txt`. 
+> Which combination of commands would achieve this?
 >
-> 3.  Under what circumstances would your new expression produce an error message
->     where the original one would not?
 >
 > > ## Solution
-> > 1. A solution using two wildcard expressions:
-> >     ~~~
-> >     $ ls *A.txt
-> >     $ ls *B.txt
-> >     ~~~
-> >     {: .language-bash}
-> > 2. The output from the new commands is separated because there are two commands.
-> > 3. When there are no files ending in `A.txt`, or there are no files ending in
-> > `B.txt`.
+> > grep "rabbit" animals.txt | cut -d, -f 1 > rabbit-dates.txt
 > {: .solution}
 {: .challenge}
 
-> ## Removing Unneeded Files
->
-> Suppose you want to delete your processed data files, and only keep
-> your raw files and processing script to save storage.
-> The raw files end in `.dat` and the processed files end in `.txt`.
-> Which of the following would remove all the processed data files,
-> and *only* the processed data files?
->
-> 1. `rm ?.txt`
-> 2. `rm *.txt`
-> 3. `rm * .txt`
-> 4. `rm *.*`
->
-> > ## Solution
-> > 1. This would remove `.txt` files with one-character names
-> > 2. This is correct answer
-> > 3. The shell would expand `*` to match everything in the current directory,
-> > so the command would try to remove all matched files and an additional
-> > file called `.txt`
-> > 4. The shell would expand `*.*` to match all files with any extension,
-> > so this command would delete all files
-> {: .solution}
-{: .challenge}
+
+
+
+
+
+
