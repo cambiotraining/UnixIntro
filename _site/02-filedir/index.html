@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="last-modified" content="2019-09-13 15:36:29 +0100">
+    <meta http-equiv="last-modified" content="2019-09-22 12:18:07 +0100">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- meta "search-domain" used for google site search function google_search() -->
     <meta name="search-domain" value="">
@@ -90,7 +90,7 @@
             
             <li><a href="../02-filedir/index.html">Basic commands</a></li>
             
-            <li><a href="../04-pipefilter/index.html">Pipes and Filters</a></li>
+            <li><a href="../04-pipefilter/index.html">Combining commands</a></li>
             
             <li><a href="../05-loop/index.html">Loops</a></li>
             
@@ -259,20 +259,20 @@ a command is important. <code class="highlighter-rouge">pwd</code> shows you whe
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">pwd</span>
 </code></pre></div></div>
 
-<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/nelle
+<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/participant
 </code></pre></div></div>
 
 <p>Here,
-the computer’s response is <code class="highlighter-rouge">/home/nelle</code>,
-which is Nelle’s <strong>home directory</strong>:</p>
+the computer’s response is <code class="highlighter-rouge">/home/participant</code>,
+which is your <strong>home directory</strong>:</p>
 
 <blockquote class="callout">
   <h2 id="home-directory-variation">Home Directory Variation</h2>
 
   <p>The home directory path will look different on different operating systems.
-On Mac it may look like <code class="highlighter-rouge">/Users/nelle</code>,
-and on Windows it will be similar to <code class="highlighter-rouge">C:\Documents and Settings\nelle</code> or
-<code class="highlighter-rouge">C:\Users\nelle</code>.
+On Mac it may look like <code class="highlighter-rouge">/Users/participant</code>,
+and on Windows it will be similar to <code class="highlighter-rouge">C:\Documents and Settings\participant</code> or
+<code class="highlighter-rouge">C:\Users\participant</code>.
 (Note that it may look slightly different for different versions of Windows.)
 In future examples, we’ve used Linux output as the default - Mac and Windows
 output may differ slightly, but should be generally similar.</p>
@@ -281,27 +281,27 @@ output may differ slightly, but should be generally similar.</p>
 <p>To understand what a “home directory” is,
 let’s have a look at how the file system as a whole is organized.  For the
 sake of this example, we’ll be
-illustrating the filesystem on our scientist Nelle’s computer.  After this
+illustrating the filesystem on a typical Linux computer.  After this
 illustration, you’ll be learning commands to explore your own filesystem,
 which will be constructed in a similar way, but not be exactly identical.</p>
 
-<p>On Nelle’s computer, the filesystem looks like this:</p>
+<p>On a typical Linux computer, the filesystem looks like this:</p>
 
 <p><img src="../fig/filesystem.svg" alt="The File System" /></p>
 
 <p>At the top is the <strong>root directory</strong>
 that holds everything else.
 We refer to it using a slash character, <code class="highlighter-rouge">/</code>, on its own;
-this is the leading slash in <code class="highlighter-rouge">/home/nelle</code>.</p>
+this is the leading slash in <code class="highlighter-rouge">/home/participant</code>.</p>
 
 <p>Inside that directory are several other directories:
 <code class="highlighter-rouge">bin</code> (which is where some built-in programs are stored),
-<code class="highlighter-rouge">data</code> (for miscellaneous data files),
-<code class="highlighter-rouge">Users</code> (where users’ personal directories are located),
+<code class="highlighter-rouge">usr</code> (for miscellaneous user files),
+<code class="highlighter-rouge">home</code> (where users’ personal directories are located),
 <code class="highlighter-rouge">tmp</code> (for temporary files that don’t need to be stored long-term),
 and so on.</p>
 
-<p>We know that our current working directory <code class="highlighter-rouge">/home/nelle</code> is stored inside <code class="highlighter-rouge">/home</code>
+<p>We know that our current working directory <code class="highlighter-rouge">/home/participant</code> is stored inside <code class="highlighter-rouge">/home</code>
 because <code class="highlighter-rouge">/home</code> is the first part of its name.
 Similarly,
 we know that <code class="highlighter-rouge">/home</code> is stored inside the root directory <code class="highlighter-rouge">/</code>
@@ -317,15 +317,15 @@ it’s just a separator.</p>
 </blockquote>
 
 <p>Underneath <code class="highlighter-rouge">/home</code>,
-we find one directory for each user with an account on Nelle’s machine,
-her colleagues <em>imhotep</em> and <em>larry</em>.</p>
+we find one directory for each user with an account on the machine,
+in this example <em>imhotep</em> and <em>larry</em>.</p>
 
 <p><img src="../fig/home-directories.svg" alt="Home Directories" /></p>
 
 <p>The user <em>imhotep</em>’s files are stored in <code class="highlighter-rouge">/home/imhotep</code>,
 user <em>larry</em>’s in <code class="highlighter-rouge">/home/larry</code>,
-and Nelle’s in <code class="highlighter-rouge">/home/nelle</code>.  Because Nelle is the current user in our
-examples here, this is why we get <code class="highlighter-rouge">/home/nelle</code> as our home directory.
+and your’s in <code class="highlighter-rouge">/home/participant</code>.  Because you are the current user in our
+examples here, this is why we get <code class="highlighter-rouge">/home/participant</code> as our home directory.
 Typically, when you open a new command prompt you will be in
 your home directory to start.</p>
 
@@ -663,15 +663,15 @@ use the following series of commands to get there:</p>
 
 <p>These commands will move us from our home directory onto our Desktop, then into
 the <code class="highlighter-rouge">data-shell</code> directory, then into the <code class="highlighter-rouge">data</code> directory.  You will notice that <code class="highlighter-rouge">cd</code> doesn’t print anything.  This is normal.  Many shell commands will not output anything to the screen when successfully executed.  But if we run <code class="highlighter-rouge">pwd</code> after it, we can see that we are now
-in <code class="highlighter-rouge">/home/nelle/Desktop/data-shell/data</code>.
+in <code class="highlighter-rouge">/home/participant/Desktop/data-shell/data</code>.
 If we run <code class="highlighter-rouge">ls</code> without arguments now,
-it lists the contents of <code class="highlighter-rouge">/home/nelle/Desktop/data-shell/data</code>,
+it lists the contents of <code class="highlighter-rouge">/home/participant/Desktop/data-shell/data</code>,
 because that’s where we now are:</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">pwd</span>
 </code></pre></div></div>
 
-<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/nelle/Desktop/data-shell/data
+<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/participant/Desktop/data-shell/data
 </code></pre></div></div>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-F</span>
@@ -713,7 +713,7 @@ if we run <code class="highlighter-rouge">pwd</code> after running <code class="
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">pwd</span>
 </code></pre></div></div>
 
-<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/nelle/Desktop/data-shell
+<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/participant/Desktop/data-shell
 </code></pre></div></div>
 
 <p>The special directory <code class="highlighter-rouge">..</code> doesn’t usually show up when we run <code class="highlighter-rouge">ls</code>.  If we want
@@ -728,7 +728,7 @@ to display it, we can give <code class="highlighter-rouge">ls</code> the <code c
 
 <p><code class="highlighter-rouge">-a</code> stands for “show all”;
 it forces <code class="highlighter-rouge">ls</code> to show us file and directory names that begin with <code class="highlighter-rouge">.</code>,
-such as <code class="highlighter-rouge">..</code> (which, if we’re in <code class="highlighter-rouge">/home/nelle</code>, refers to the <code class="highlighter-rouge">/home</code> directory)
+such as <code class="highlighter-rouge">..</code> (which, if we’re in <code class="highlighter-rouge">/home/participant</code>, refers to the <code class="highlighter-rouge">/home</code> directory)
 As you can see,
 it also displays another special directory that’s just called <code class="highlighter-rouge">.</code>,
 which means “the current working directory”.
@@ -786,10 +786,10 @@ to move to <code class="highlighter-rouge">data-shell</code>.</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">pwd</span>
 </code></pre></div></div>
 
-<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/nelle/Desktop/data-shell/data
+<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/participant/Desktop/data-shell/data
 </code></pre></div></div>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd</span> /home/nelle/Desktop/data-shell
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd</span> /home/participant/Desktop/data-shell
 </code></pre></div></div>
 
 <p>Run <code class="highlighter-rouge">pwd</code> and <code class="highlighter-rouge">ls -F</code> to ensure that we’re in the directory we expect.</p>
@@ -798,10 +798,10 @@ to move to <code class="highlighter-rouge">data-shell</code>.</p>
   <h2 id="another-shortcut">Another Shortcut</h2>
 
   <p>The shell interprets the character <code class="highlighter-rouge">~</code> (tilde) at the start of a path to
-mean “the current user’s home directory”. For example, if Nelle’s home
-directory is <code class="highlighter-rouge">/home/nelle</code>, then <code class="highlighter-rouge">~/data</code> is equivalent to
-<code class="highlighter-rouge">/home/nelle/data</code>. This only works if it is the first character in the
-path: <code class="highlighter-rouge">here/there/~/elsewhere</code> is <em>not</em> <code class="highlighter-rouge">here/there/home/nelle/elsewhere</code>.</p>
+mean “the current user’s home directory”. For example, for your home directory
+,<code class="highlighter-rouge">/home/participant</code>, then <code class="highlighter-rouge">~/data</code> is equivalent to
+<code class="highlighter-rouge">/home/participant/data</code>. This only works if it is the first character in the
+path: <code class="highlighter-rouge">here/there/~/elsewhere</code> is <em>not</em> <code class="highlighter-rouge">here/there/home/participant/elsewhere</code>.</p>
 
 </blockquote>
 
@@ -811,7 +811,7 @@ path: <code class="highlighter-rouge">here/there/~/elsewhere</code> is <em>not</
   <p>Sometimes file and directory names get too long and it’s tedious to have to
 type the full name for example when moving with <code class="highlighter-rouge">cd</code>.  We can let the shell do most 
 of the work &gt; through what is called <strong>tab completion</strong>. 
-Let’s say we are in the <code class="highlighter-rouge">/home/nelle/Desktop/data-shell/</code> and we type:</p>
+Let’s say we are in the <code class="highlighter-rouge">/home/participant/Desktop/data-shell/</code> and we type:</p>
 
   <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">ls </span>nor
 </code></pre></div>  </div>
@@ -934,7 +934,7 @@ and use <code class="highlighter-rouge">ls -F</code> to see what it contains:</p
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">pwd</span>
 </code></pre></div></div>
 
-<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/nelle/Desktop/data-shell
+<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/participant/Desktop/data-shell
 </code></pre></div></div>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-F</span>
@@ -1292,11 +1292,12 @@ cannot be created.</li>
 <blockquote class="challenge">
   <h2 id="moving-and-copying">Moving and Copying</h2>
 
-  <p>What is the output of the closing <code class="highlighter-rouge">ls</code> command in the sequence shown below?</p>
+  <p>What is the output of the closing <code class="highlighter-rouge">ls</code> command in the sequence shown below?
+You can try the commands starting from <code class="highlighter-rouge">/home/participant/Desktop/data-shell/protein-data</code>.</p>
 
   <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">pwd</span>
 </code></pre></div>  </div>
-  <div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/nelle/protein-data
+  <div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/home/participant/Desktop/data-shell/protein-data
 </code></pre></div>  </div>
   <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">ls</span>
 </code></pre></div>  </div>
@@ -1317,19 +1318,19 @@ cannot be created.</li>
 
   <blockquote class="solution">
     <h2 id="solution-7">Solution</h2>
-    <p>We start in the <code class="highlighter-rouge">/home/nelle/protein-data</code> directory, and create a new folder called <code class="highlighter-rouge">recombine</code>.
+    <p>We start in the <code class="highlighter-rouge">/home/participant/protein-data</code> directory, and create a new folder called <code class="highlighter-rouge">recombine</code>.
 The second line moves (<code class="highlighter-rouge">mv</code>) the file <code class="highlighter-rouge">proteins.dat</code> to the new folder (<code class="highlighter-rouge">recombine</code>).
 The third line makes a copy of the file we just moved.  The tricky part here is where the file was
-copied to.  Recall that <code class="highlighter-rouge">..</code> means “go up a level”, so the copied file is now in <code class="highlighter-rouge">/Users/jamie</code>.
+copied to.  Recall that <code class="highlighter-rouge">..</code> means “go up a level”, so the copied file is now in <code class="highlighter-rouge">/home/participant/Desktop/data-shell</code>.
 Notice that <code class="highlighter-rouge">..</code> is interpreted with respect to the current working
 directory, <strong>not</strong> with respect to the location of the file being copied.
-So, the only thing that will show using ls (in <code class="highlighter-rouge">/Users/jamie/data</code>) is the recombine folder.</p>
+So, the only thing that will show using ls (in <code class="highlighter-rouge">/home/participant/Desktop/data-shell/protein-data</code>) is the recombine folder.</p>
 
     <ol>
-      <li>No, see explanation above.  <code class="highlighter-rouge">proteins-saved.dat</code> is located at <code class="highlighter-rouge">/home/nelle</code></li>
+      <li>No, see explanation above.  <code class="highlighter-rouge">proteins-saved.dat</code> is located at <code class="highlighter-rouge">/home/participant/Desktop/data-shell</code></li>
       <li>Yes</li>
-      <li>No, see explanation above.  <code class="highlighter-rouge">proteins.dat</code> is located at <code class="highlighter-rouge">/home/nelle/protein-data/recombine</code></li>
-      <li>No, see explanation above.  <code class="highlighter-rouge">proteins-saved.dat</code> is located at <code class="highlighter-rouge">/home/nelle</code></li>
+      <li>No, see explanation above.  <code class="highlighter-rouge">proteins.dat</code> is located at <code class="highlighter-rouge">/home/participant/Desktop/data-shell/protein-data/recombine</code></li>
+      <li>No, see explanation above.  <code class="highlighter-rouge">proteins-saved.dat</code> is located at <code class="highlighter-rouge">/home/participant/Desktop/data-shell</code></li>
     </ol>
   </blockquote>
 </blockquote>
@@ -1501,7 +1502,7 @@ produce this output?</p>
 <blockquote class="challenge">
   <h2 id="more-on-wildcards">More on Wildcards</h2>
 
-  <p>Look into the <code class="highlighter-rouge">exp</code> directory in <code class="highlighter-rouge">~/data-shell/exp</code> that has the following structure:</p>
+  <p>Look into the <code class="highlighter-rouge">exp</code> directory in <code class="highlighter-rouge">~/Desktop/data-shell/data/exp</code> that has the following structure:</p>
 
   <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>exp
 ├── 2015-10-23-calibration.txt
