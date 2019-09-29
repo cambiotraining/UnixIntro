@@ -1393,18 +1393,12 @@ Oftentimes one needs to copy or move several files at once. This can be done by 
 > ├── 2015-11-23-dataset1.txt
 > ├── 2015-11-23-dataset2.txt
 > ├── 2015-11-23-dataset_overview.txt
-> ├── backup
-> │   ├── calibration
-> │   └── datasets
-> └── send_to_bob
->     ├── all_datasets_created_on_a_23rd
->     └── all_november_files
 > ~~~
 > {: .language-bash}
 >
 >
 > Suppose you want to:
->  1. backup all dataset file to the `backup/datasets` 
+>  1. backup all dataset file to `backup/datasets` 
 > and all calibration files to `backup/calibration`
 >  2. copy all the dataset files created
 > on the 23rd to `send_to_bob/all_datasets_created_on_a_23rd` and all November files (calibration)
@@ -1460,6 +1454,13 @@ Oftentimes one needs to copy or move several files at once. This can be done by 
 >
 > > ## Solution
 > > ```
+> > $ mkdir backup
+> > $ mkdir backup/calibration
+> > $ mkdir backup/datasets
+> > $ mkdir send_to_bob
+> > $ mkdir send_to_bob/all_datasets_created_on_a_23rd
+> > $ mkdir send_to_bob/all_november_files
+> > $ cp *dataset*.txt backup/datasets
 > > $ cp *calibration.txt backup/calibration
 > > $ cp 2015-11-* send_to_bob/all_november_files/
 > > $ cp *-23-dataset* send_to_bob/all_datasets_created_on_a_23rd/
