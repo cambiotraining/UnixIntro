@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="last-modified" content="2019-09-22 12:18:07 +0100">
+    <meta http-equiv="last-modified" content="2019-09-29 11:27:54 +0100">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- meta "search-domain" used for google site search function google_search() -->
     <meta name="search-domain" value="">
@@ -86,17 +86,9 @@
           <a href="../" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Episodes <span class="caret"></span></a>
           <ul class="dropdown-menu">
             
-            <li><a href="../01-intro/index.html">Introducing the Shell</a></li>
-            
             <li><a href="../02-filedir/index.html">Basic commands</a></li>
             
             <li><a href="../04-pipefilter/index.html">Combining commands</a></li>
-            
-            <li><a href="../05-loop/index.html">Loops</a></li>
-            
-            <li><a href="../06-script/index.html">Shell Scripts</a></li>
-            
-            <li><a href="../07-find/index.html">Finding Things</a></li>
             
 	    <li role="separator" class="divider"></li>
             <li><a href="../aio.html">All in one page (Beta)</a></li>
@@ -144,28 +136,6 @@
 
 <h2>Key Points</h2>
 <table class="table table-striped">
-
-  
-    <tr>
-      <td class="col-md-3">
-        <a href="../01-intro/index.html">Introducing the Shell</a>
-      </td>
-      <td class="col-md-9">
-        <ul>
-        
-        <li><p>A shell is a program whose primary purpose is to read commands and run other programs.</p>
-</li>
-        
-        <li><p>The shell’s main advantages are its high action-to-keystroke ratio, its support for automating repetitive tasks, and its capacity to access networked machines.</p>
-</li>
-        
-        <li><p>The shell’s main disadvantages are its primarily textual nature and how cryptic its commands and operation can be.</p>
-</li>
-        
-        </ul>
-      </td>
-    </tr>
-  
 
   
     <tr>
@@ -273,102 +243,6 @@
 </li>
         
         <li><p>The best way to use the shell is to use pipes to combine simple single-purpose programs (filters).</p>
-</li>
-        
-        </ul>
-      </td>
-    </tr>
-  
-
-  
-    <tr>
-      <td class="col-md-3">
-        <a href="../05-loop/index.html">Loops</a>
-      </td>
-      <td class="col-md-9">
-        <ul>
-        
-        <li><p>A <code class="highlighter-rouge">for</code> loop repeats commands once for every thing in a list.</p>
-</li>
-        
-        <li><p>Every <code class="highlighter-rouge">for</code> loop needs a variable to refer to the thing it is currently operating on.</p>
-</li>
-        
-        <li><p>Use <code class="highlighter-rouge">$name</code> to expand a variable (i.e., get its value). <code class="highlighter-rouge">${name}</code> can also be used.</p>
-</li>
-        
-        <li><p>Do not use spaces, quotes, or wildcard characters such as ‘*’ or ‘?’ in filenames, as it complicates variable expansion.</p>
-</li>
-        
-        <li><p>Give files consistent names that are easy to match with wildcard patterns to make it easy to select them for looping.</p>
-</li>
-        
-        <li><p>Use the up-arrow key to scroll up through previous commands to edit and repeat them.</p>
-</li>
-        
-        <li><p>Use <code class="highlighter-rouge">Ctrl-R</code> to search through the previously entered commands.</p>
-</li>
-        
-        <li><p>Use <code class="highlighter-rouge">history</code> to display recent commands, and <code class="highlighter-rouge">!number</code> to repeat a command by number.</p>
-</li>
-        
-        </ul>
-      </td>
-    </tr>
-  
-
-  
-    <tr>
-      <td class="col-md-3">
-        <a href="../06-script/index.html">Shell Scripts</a>
-      </td>
-      <td class="col-md-9">
-        <ul>
-        
-        <li><p>Save commands in files (usually called shell scripts) for re-use.</p>
-</li>
-        
-        <li><p><code class="highlighter-rouge">bash filename</code> runs the commands saved in a file.</p>
-</li>
-        
-        <li><p><code class="highlighter-rouge">$@</code> refers to all of a shell script’s command-line arguments.</p>
-</li>
-        
-        <li><p><code class="highlighter-rouge">$1</code>, <code class="highlighter-rouge">$2</code>, etc., refer to the first command-line argument, the second command-line argument, etc.</p>
-</li>
-        
-        <li><p>Place variables in quotes if the values might have spaces in them.</p>
-</li>
-        
-        <li><p>Letting users decide what files to process is more flexible and more consistent with built-in Unix commands.</p>
-</li>
-        
-        </ul>
-      </td>
-    </tr>
-  
-
-  
-    <tr>
-      <td class="col-md-3">
-        <a href="../07-find/index.html">Finding Things</a>
-      </td>
-      <td class="col-md-9">
-        <ul>
-        
-        <li><p><code class="highlighter-rouge">find</code> finds files with specific properties that match patterns.</p>
-</li>
-        
-        <li><p><code class="highlighter-rouge">grep</code> selects lines in files that match patterns.</p>
-</li>
-        
-        <li><p><code class="highlighter-rouge">--help</code> is an option supported by many bash commands, and programs that can be run from within Bash, to display more information on how to use these commands or programs.</p>
-</li>
-        
-        <li><p><code class="highlighter-rouge">man command</code> displays the manual page for a given command.</p>
-</li>
-        
-        <li><p><code class="highlighter-rouge">$(command)</code> inserts a command’s output in place.</p>
 </li>
         
         </ul>

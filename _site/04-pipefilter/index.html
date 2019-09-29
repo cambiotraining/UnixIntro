@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="last-modified" content="2019-09-22 12:18:07 +0100">
+    <meta http-equiv="last-modified" content="2019-09-29 11:27:54 +0100">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- meta "search-domain" used for google site search function google_search() -->
     <meta name="search-domain" value="">
@@ -86,17 +86,9 @@
           <a href="../" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Episodes <span class="caret"></span></a>
           <ul class="dropdown-menu">
             
-            <li><a href="../01-intro/index.html">Introducing the Shell</a></li>
-            
             <li><a href="../02-filedir/index.html">Basic commands</a></li>
             
             <li><a href="../04-pipefilter/index.html">Combining commands</a></li>
-            
-            <li><a href="../05-loop/index.html">Loops</a></li>
-            
-            <li><a href="../06-script/index.html">Shell Scripts</a></li>
-            
-            <li><a href="../07-find/index.html">Finding Things</a></li>
             
 	    <li role="separator" class="divider"></li>
             <li><a href="../aio.html">All in one page (Beta)</a></li>
@@ -155,7 +147,7 @@
   <div class="col-xs-1">
     <h3 class="text-right">
       
-      <a href="../05-loop/index.html"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span><span class="sr-only">next episode</span></a>
+      <a href="../"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span><span class="sr-only">lesson home</span></a>
       
     </h3>
   </div>
@@ -595,8 +587,10 @@ Suppose you want to do some quick sanity checks on the content of the files. You
     <h2 id="solution-4">Solution</h2>
     <ol>
       <li><code class="highlighter-rouge">wc -l *.txt | sort -n | head -n 5</code>. You can report the number of lines of all the
-text files in the directory, sort them, and then get the</li>
-      <li><code class="highlighter-rouge">wc -l *.txt | sort -n | tail -n 5</code>. Same as above but now we want the files</li>
+text files in the directory, sort them, and then get the top (if any files have fewer than 
+300 lines they will appear here).</li>
+      <li><code class="highlighter-rouge">wc -l *.txt | sort -n -r | head -n 5</code>. Same as above but now we want to sort the
+files in reverse order.</li>
     </ol>
   </blockquote>
 </blockquote>
@@ -805,7 +799,7 @@ Which combination of commands would achieve this?</p>
   <div class="col-xs-1">
     <h3 class="text-right">
       
-      <a href="../05-loop/index.html"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span><span class="sr-only">next episode</span></a>
+      <a href="../"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span><span class="sr-only">lesson home</span></a>
       
     </h3>
   </div>

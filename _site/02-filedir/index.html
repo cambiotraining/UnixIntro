@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="last-modified" content="2019-09-22 12:18:07 +0100">
+    <meta http-equiv="last-modified" content="2019-09-29 11:27:54 +0100">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- meta "search-domain" used for google site search function google_search() -->
     <meta name="search-domain" value="">
@@ -86,17 +86,9 @@
           <a href="../" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Episodes <span class="caret"></span></a>
           <ul class="dropdown-menu">
             
-            <li><a href="../01-intro/index.html">Introducing the Shell</a></li>
-            
             <li><a href="../02-filedir/index.html">Basic commands</a></li>
             
             <li><a href="../04-pipefilter/index.html">Combining commands</a></li>
-            
-            <li><a href="../05-loop/index.html">Loops</a></li>
-            
-            <li><a href="../06-script/index.html">Shell Scripts</a></li>
-            
-            <li><a href="../07-find/index.html">Finding Things</a></li>
             
 	    <li role="separator" class="divider"></li>
             <li><a href="../aio.html">All in one page (Beta)</a></li>
@@ -143,7 +135,7 @@
   <div class="col-xs-1">
     <h3 class="text-left">
       
-      <a href="../01-intro/index.html"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span><span class="sr-only">previous episode</span></a>
+      <a href="../"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span><span class="sr-only">lesson home</span></a>
       
     </h3>
   </div>
@@ -318,13 +310,13 @@ it’s just a separator.</p>
 
 <p>Underneath <code class="highlighter-rouge">/home</code>,
 we find one directory for each user with an account on the machine,
-in this example <em>imhotep</em> and <em>larry</em>.</p>
+in this example <em>imhotep</em>, <em>larry</em>, and participant (you).</p>
 
 <p><img src="../fig/home-directories.svg" alt="Home Directories" /></p>
 
 <p>The user <em>imhotep</em>’s files are stored in <code class="highlighter-rouge">/home/imhotep</code>,
 user <em>larry</em>’s in <code class="highlighter-rouge">/home/larry</code>,
-and your’s in <code class="highlighter-rouge">/home/participant</code>.  Because you are the current user in our
+and yours in <code class="highlighter-rouge">/home/participant</code>.  Because you are the current user in our
 examples here, this is why we get <code class="highlighter-rouge">/home/participant</code> as our home directory.
 Typically, when you open a new command prompt you will be in
 your home directory to start.</p>
@@ -361,8 +353,8 @@ directory.</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-F</span>
 </code></pre></div></div>
 
-<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Documents    Downloads    Music        Public
-Desktop      Movies       Pictures     Templates
+<div class="output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Documents/    Downloads/    Music/        Public/
+Desktop/      Movies/       Pictures/     Templates/
 </code></pre></div></div>
 
 <p>Here,
@@ -708,7 +700,7 @@ that looks like this:</p>
 or more succinctly,
 the <strong>parent</strong> of the current directory.
 Sure enough,
-if we run <code class="highlighter-rouge">pwd</code> after running <code class="highlighter-rouge">cd ..</code>, we’re back in <code class="highlighter-rouge">/home/nelle/Desktop/data-shell</code>:</p>
+if we run <code class="highlighter-rouge">pwd</code> after running <code class="highlighter-rouge">cd ..</code>, we’re back in <code class="highlighter-rouge">/home/participant/Desktop/data-shell</code>:</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">pwd</span>
 </code></pre></div></div>
@@ -1140,7 +1132,7 @@ programs.</p>
 <blockquote class="callout">
   <h2 id="whats-in-a-name">What’s In A Name?</h2>
 
-  <p>You may have noticed that all of Nelle’s files are named “something dot
+  <p>You may have noticed that all of the files in our data directory are named “something dot
 something”, and in this part of the lesson, we always used the extension
 <code class="highlighter-rouge">.txt</code>.  This is just a convention: we can call a file <code class="highlighter-rouge">mythesis</code> or
 almost anything else we want. However, most people use two-part names
@@ -1715,7 +1707,7 @@ as the ‘data’ directory.</p>
   <div class="col-xs-1">
     <h3 class="text-left">
       
-      <a href="../01-intro/index.html"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span><span class="sr-only">previous episode</span></a>
+      <a href="../"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span><span class="sr-only">lesson home</span></a>
       
     </h3>
   </div>
