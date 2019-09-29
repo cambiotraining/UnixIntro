@@ -1,5 +1,7 @@
 ---
 title: "Combining commands"
+teaching: 45
+exercises: 30
 questions:
 - "How can I combine existing commands to do new things?"
 objectives:
