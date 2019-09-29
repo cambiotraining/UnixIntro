@@ -441,8 +441,10 @@ The redirection and pipes used in the last few commands are illustrated below:
 >
 > > ## Solution
 > > 1. `wc -l *.txt | sort -n | head -n 5`. You can report the number of lines of all the
-> > text files in the directory, sort them, and then get the 
-> > 2. `wc -l *.txt | sort -n | tail -n 5`. Same as above but now we want the files 
+> > text files in the directory, sort them, and then get the top (if any files have fewer than 
+> > 300 lines they will appear here).
+> > 2. `wc -l *.txt | sort -n -r | head -n 5`. Same as above but now we want to sort the
+> > files in reverse order.
 > {: .solution}
 {: .challenge}
 

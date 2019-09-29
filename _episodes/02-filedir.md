@@ -117,13 +117,13 @@ because its name begins with `/`.
 
 Underneath `/home`,
 we find one directory for each user with an account on the machine,
-in this example *imhotep* and *larry*.
+in this example *imhotep*, *larry*, and participant (you).
 
 ![Home Directories](../fig/home-directories.svg)
 
 The user *imhotep*'s files are stored in `/home/imhotep`,
 user *larry*'s in `/home/larry`,
-and your's in `/home/participant`.  Because you are the current user in our
+and yours in `/home/participant`.  Because you are the current user in our
 examples here, this is why we get `/home/participant` as our home directory.
 Typically, when you open a new command prompt you will be in
 your home directory to start.
@@ -165,8 +165,8 @@ $ ls -F
 {: .language-bash}
 
 ~~~
-Documents    Downloads    Music        Public
-Desktop      Movies       Pictures     Templates
+Documents/    Downloads/    Music/        Public/
+Desktop/      Movies/       Pictures/     Templates/
 ~~~
 {: .output}
 
@@ -545,7 +545,7 @@ $ cd ..
 or more succinctly,
 the **parent** of the current directory.
 Sure enough,
-if we run `pwd` after running `cd ..`, we're back in `/home/nelle/Desktop/data-shell`:
+if we run `pwd` after running `cd ..`, we're back in `/home/participant/Desktop/data-shell`:
 
 ~~~
 $ pwd
@@ -975,7 +975,7 @@ draft.txt
 
 > ## What's In A Name?
 >
-> You may have noticed that all of Nelle's files are named "something dot
+> You may have noticed that all of the files in our data directory are named "something dot
 > something", and in this part of the lesson, we always used the extension
 > `.txt`.  This is just a convention: we can call a file `mythesis` or
 > almost anything else we want. However, most people use two-part names
