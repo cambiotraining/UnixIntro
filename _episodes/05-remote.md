@@ -186,10 +186,97 @@ We need to first ssh to the remote server and then issue a command to add `rsync
 $ ssh -p 8890 sshuser@127.0.0.1
 $ sudo apt -y install rsync
 ~~~
+{: .language-bash}
+
 Finally Ctrl+D to exit.
 
+Now we have everything set up we can issue the `rsync` to sync our two directories
 
+~~~
+$ rsync -e 'ssh -p 8890' -avz workflow sshuser@127.0.0.1:/home/sshuser/workflow
+~~~
+{: .language-bash}
 
+The `-e` flag allows us to specify the protocol rsync uses to operate. We can use this to have it work over the same ssh connection that all of the previous commands have.
+
+The `-v` flag stands for `verbose` and outputs a lot of status information during the transfer. This is helpful when running the command interactively but should generally be removed when writing scripts.
+
+The `-z` flag means that the data will be compressed in transit. This is good practice depending on the speed of your connection (although in our case it is a little unecessary).
+
+Whilst we've used rsync in mostly the same way as we did scp it has many more customisation options as we can observe on the man page
+
+~~~
+$ man rsync
+~~~
+{: .language-bash}
+
+`-a` is useful for preserving filesystem metadata regarding the files being copied. This is particularly relevant for backups or situations where you intend to sync a copy back over your original at a later point.
+
+`--exclude` and `--include` can be used to  more granularly control which files are copied
+
+Finally `--delete` is very useful when you want to maintain an exact copy of the source including the deletion of files only present in the destination. Let's tidy up our `workflow` directory with this option.
+
+> ## How to remove files using rsync --delete
+>
+> First we should manually delete our local copies of the empty files we created.
+>
+> ~~~
+> $ rm workflow/newfile*
+> ~~~
+>{: .language-bash}
+>
+> consulting the output of `man rsync` synchronize the local folder with the remote folder again. This time causing the remote copies of newfile* to be deleted.
+>
+> keep in mind that for rsync a path with a trailing `/` means the contents of a directory rather than the directory itself.
+> Think about how using the `--delete` flag could make it very dangerous to make this mistake.
+>
+> Don't worry too much though, you can always upload a new copy of the data.
+>
+> > ## Solution
+> > ~~~
+> > rsync -e 'ssh -p 8890' -avz --delete ../workflow sshuser@127.0.0.1:/home/sshuser/workflow
+> > ~~~
+> {: .solution}
+{: .challenge}
+
+## SshFs
+
+Sshfs is another way of using the same ssh protocol to share files in a slightly different way. This software allows us to connect the file system of one machine with the file system of another using a "mount point". Let's start by making a directory in `/home/participant/Desktop/data-shell` to act as this mount point. Convention tells us to call it `mnt`.
+
+~~~
+$ mkdir /home/participant/Desktop/data-shell/mnt
+~~~
+{: .language-bash}
+
+Now we can run the `sshfs` command
+
+~~~
+$ sshfs sshuser@127.0.0.1:/home/sshuser /home/participant/Desktop/data-shell/mnt/ -p 8890
+~~~
+{: .language-bash}
+
+It looks fairly similar to the previous copying commands. The first argument is a remote source, the second argument is a local destination. The difference is that now whenever we interact with our local mount point it will be as if we were interacting with the remote filesystem starting at the directory we specified `/home/sshuser`.
+
+~~~
+$ cd /home/participant/Desktop/data-shell/mnt/ 
+$ ls -l
+~~~
+{: .language-bash}
+
+~~~
+total 8
+-rw-r--r-- 1 brewmaster brewmaster    0 Sep 30 07:07 file1
+-rw-r--r-- 1 brewmaster brewmaster   95 Sep 30 05:36 notes.txt
+-rw-r--r-- 1 brewmaster brewmaster    0 Sep 30 08:05 test
+drwxr-xr-x 1 brewmaster brewmaster 4096 Sep 30 07:30 workflow
+~~~
+{: .output}
+
+The files shown are not on the local machine at all but we can still access and edit them. Much like the concept of a shared network drive in Windows.
+
+This approach is particularly useful when you need to use a program which isn't available on the remote server to edit or visualize files stored remotely. Keep in mind however, that every action taken on these files is being encrypted and sent over the network. Using this approach for computationally intense tasks could substantially slow down the time to completion.
+
+It's also worth noting that this isn't the only way to mount remote directories in linux. Protocols such as [nfs](https://en.wikipedia.org/wiki/Network_File_System) and [samba](https://en.wikipedia.org/wiki/Samba_(software)) are actually more common and may be more appropriate for a given use case. Sshfs has the advantage of running over ssh so it require very little set up on the remote computer.
 
 ## Wget - Accessing web resources
 
