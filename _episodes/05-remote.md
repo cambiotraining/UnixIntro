@@ -70,19 +70,17 @@ $ ls -la /home
 
 `ssh` has a simple file copying counterpart called `scp` which uses all the same methods for authentication and encryption but focuses on moving files between computers in a similar manner to the `cp` command we learnt about before.
 
+Making sure we're in the `data-shell` directory let's copy the notes.txt file to the remote machine
+
 ~~~
-$ wc -l *.pdb > lengths.txt
+$ cd ~/Desktop/data-shell
+$ scp -P 8890 notes.txt sshuser@127.0.0.1:/home/sshuser
 ~~~
 {: .language-bash}
 
-The greater than symbol, `>`, tells the shell to **redirect** the command's output
-to a file instead of printing it to the screen. (This is why there is no screen output:
-everything that `wc` would have printed has gone into the
-file `lengths.txt` instead.)  The shell will create
-the file if it doesn't exist. If the file exists, it will be
-silently overwritten, which may lead to data loss and thus requires
-some caution.
-`ls lengths.txt` confirms that the file exists:
+The format of the command should be quite familiar when comparing to the `cp` command for local copying. The last two arguments specify the source and the destination of the copy respectively. The difference comes in that any remote locations involved in the copy must be preceded by the `username@IP` syntax used in the `ssh` command previously. The first half tells scp how to access the computer and the second half tells it where in the filesystem to operate, these two segments are separated by a `:` .
+
+Note that scp uses a capital `-P` to specify the port number
 
 ~~~
 $ ls lengths.txt
@@ -90,31 +88,50 @@ $ ls lengths.txt
 {: .language-bash}
 
 ~~~
-lengths.txt
+notes.txt                                     100%   86   152.8KB/s   00:00
 ~~~
 {: .output}
 
-We can now send the content of `lengths.txt` to the screen using `cat lengths.txt`.
-The `cat` command gets its name from "concatenate" i.e. join together,
-and it prints the contents of files one after another.
-There's only one file in this case,
-so `cat` just shows us what it contains:
+Now it looks like we've copied the file, but we should check.
+
+Establishing a whole ssh session just to run one command might be a bit cumbersome. Instead we can tell ssh all the commands it needs to run at the same time we connect by adding an extra argument to the end. Ssh will automatically disconnect after it completes the full command string.
 
 ~~~
-$ cat lengths.txt
+$ ssh -p 8890 sshuser@127.0.0.1 "ls /home/sshuser"
 ~~~
 {: .language-bash}
 
 ~~~
-  20  cubane.pdb
-  12  ethane.pdb
-   9  methane.pdb
-  30  octane.pdb
-  21  pentane.pdb
-  15  propane.pdb
- 107  total
+notes.txt
 ~~~
 {: .output}
+
+Success!
+
+> ## How do we get files back from the remote server?
+>
+> Using two commands we've uploaded a file to our server and checked it was there
+>
+> ~~~
+> $ scp -P 8890 notes.txt sshuser@127.0.0.1:/home/sshuser
+> $ ssh -p 8890 sshuser@127.0.0.1 "ls /home/sshuser"
+> ~~~
+> {: .language-bash}
+> 
+> More often we might want to have the server do some work on our files and then get them back. We can use exactly the same syntax structure with different arguments. 
+>
+> Try and make a change to notes.txt (perhaps add some text to the end with `echo` and `>>`) in the remote location and then retrieve the changed file. Remember to change the name of the file as you already have a notes.txt in your directory.
+>
+> If you're having trouble check `man scp` for more information about how to structure the command
+>
+> > ## Solution
+> > ~~~
+> > ssh -p 8890 sshuser@127.0.0.1 "echo all done >> notes.txt"
+> > scp -P 8890 sshuser@127.0.0.1:notes.txt changed_notes.txt
+> > ~~~
+> {: .solution}
+{: .challenge}
+
 
 > ## Output Page by Page
 >
