@@ -3,7 +3,7 @@ title: "Using remote resources"
 teaching: 45
 exercises: 30
 questions:
-- "How can I work on the unix shell of a remote computer:
+- "How can I work on the unix shell of a remote computer:"
 - "How can I move files between computers"
 - "How can I access web resources using the command line"
 - "Mounting a directory from another computer onto your local filesystem"
