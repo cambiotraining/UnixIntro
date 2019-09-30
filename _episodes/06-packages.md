@@ -1,615 +1,742 @@
 ---
-title: "Package management and installing software"
-teaching: 45
-exercises: 30
+title: "Loops"
+teaching: 40
+exercises: 10
 questions:
-- "How can I combine existing commands to do new things?"
+- "How can I perform the same actions on many different files?"
 objectives:
-- "Redirect a command's output to a file."
-- "Process a file instead of keyboard input using redirection."
-- "Construct command pipelines with two or more stages."
-- "Explain what usually happens if a program or pipeline isn't given any input to process."
-- "Explain Unix's 'small pieces, loosely joined' philosophy."
+- "Write a loop that applies one or more commands separately to each file in a set of files."
+- "Trace the values taken on by a loop variable during execution of the loop."
+- "Explain the difference between a variable's name and its value."
+- "Explain why spaces and some punctuation characters shouldn't be used in file names."
+- "Demonstrate how to see what commands have recently been executed."
+- "Re-run recently executed commands without retyping them."
 keypoints:
-- "`cat` displays the contents of its inputs."
-- "`head` displays the first 10 lines of its input."
-- "`tail` displays the last 10 lines of its input."
-- "`sort` sorts its inputs."
-- "`wc` counts lines, words, and characters in its inputs."
-- "`command > file` redirects a command's output to a file (overwriting any existing content)."
-- "`command >> file` appends a command's output to a file."
-- "`<` operator redirects input to a command"
-- "`first | second` is a pipeline: the output of the first command is used as the input to the second."
-- "The best way to use the shell is to use pipes to combine simple single-purpose programs (filters)."
+- "A `for` loop repeats commands once for every thing in a list."
+- "Every `for` loop needs a variable to refer to the thing it is currently operating on."
+- "Use `$name` to expand a variable (i.e., get its value). `${name}` can also be used."
+- "Do not use spaces, quotes, or wildcard characters such as '*' or '?' in filenames, as it complicates variable expansion."
+- "Give files consistent names that are easy to match with wildcard patterns to make it easy to select them for looping."
+- "Use the up-arrow key to scroll up through previous commands to edit and repeat them."
+- "Use `Ctrl-R` to search through the previously entered commands."
+- "Use `history` to display recent commands, and `!number` to repeat a command by number."
 ---
 
-Now that we know a few basic commands,
-we can finally look at the shell's most powerful feature:
-the ease with which it lets us combine existing programs in new ways.
-We'll start with a directory called `molecules`
-that contains six files describing some simple organic molecules.
-The `.pdb` extension indicates that these files are in Protein Data Bank format,
-a simple text format that specifies the type and position of each atom in the molecule.
+**Loops** are a programming construct which allow us to repeat a command or set of commands
+for each item in a list.
+As such they are key to productivity improvements through automation.
+Similar to wildcards and tab completion, using loops also reduces the
+amount of typing required (and hence reduces the number of typing mistakes).
 
-~~~
-$ ls molecules
-~~~
+Suppose we have several hundred genome data files named `basilisk.dat`, `minotaur.dat`, and
+`unicorn.dat`.
+For this example, we'll use the `creatures` directory which only has three example files,
+but the principles can be applied to many many more files at once.
+
+The structure of these files is the same: the common name, classification, and updated date are
+presented on the first three lines, with DNA sequences on the following lines.
+Let's look at the files:
+
+```
+head -n 5 basilisk.dat minotaur.dat unicorn.dat
+```
 {: .language-bash}
 
-~~~
-cubane.pdb    ethane.pdb    methane.pdb
-octane.pdb    pentane.pdb   propane.pdb
-~~~
-{: .output}
+We would like to print out the classification for each species, which is given on the second
+line of each file.
+For each file, we would need to execute the command `head -n 2` and pipe this to `tail -n 1`.
+We’ll use a loop to solve this problem, but first let’s look at the general form of a loop:
 
-Let's go into that directory with `cd` and run the command `wc *.pdb`.
-`wc` is the "word count" command:
-it counts the number of lines, words, and characters in files (from left to right, in that order).
-
-The `*` in `*.pdb` matches zero or more characters,
-so the shell turns `*.pdb` into a list of all `.pdb` files in the current directory:
-
-~~~
-$ cd molecules
-$ wc *.pdb
-~~~
+```
+for thing in list_of_things
+do
+    operation_using $thing    # Indentation within the loop is not required, but aids legibility
+done
+```
 {: .language-bash}
 
-~~~
-  20  156  1158  cubane.pdb
-  12  84   622   ethane.pdb
-   9  57   422   methane.pdb
-  30  246  1828  octane.pdb
-  21  165  1226  pentane.pdb
-  15  111  825   propane.pdb
- 107  819  6081  total
-~~~
-{: .output}
+and we can apply this to our example like this:
 
-
-
-If we run `wc -l` instead of just `wc`,
-the output shows only the number of lines per file:
-
-~~~
-$ wc -l *.pdb
-~~~
+```
+$ for filename in basilisk.dat minotaur.dat unicorn.dat
+> do
+>    head -n 2 $filename | tail -n 1
+> done
+```
 {: .language-bash}
 
-~~~
-  20  cubane.pdb
-  12  ethane.pdb
-   9  methane.pdb
-  30  octane.pdb
-  21  pentane.pdb
-  15  propane.pdb
- 107  total
-~~~
+```
+CLASSIFICATION: basiliscus vulgaris
+CLASSIFICATION: bos hominus
+CLASSIFICATION: equus monoceros
+```
 {: .output}
 
-> ## Why Isn't It Doing Anything?
+
+> ## Follow the Prompt
 >
-> What happens if a command is supposed to process a file, but we
-> don't give it a filename? For example, what if we type:
->
-> ~~~
-> $ wc -l
-> ~~~
-> {: .language-bash}
->
-> but don't type `*.pdb` (or anything else) after the command?
-> Since it doesn't have any filenames, `wc` assumes it is supposed to
-> process input given at the command prompt, so it just sits there and waits for us to give
-> it some data interactively. From the outside, though, all we see is it
-> sitting there: the command doesn't appear to do anything.
->
-> If you make this kind of mistake, you can escape out of this state by holding down
-> the control key (<kbd>Ctrl</kbd>) and typing the letter <kbd>C</kbd> once and letting go of the <kbd>Ctrl</kbd> key.
-> <kbd>Ctrl</kbd>+<kbd>C</kbd>
+> The shell prompt changes from `$` to `>` and back again as we were
+> typing in our loop. The second prompt, `>`, is different to remind
+> us that we haven't finished typing a complete command yet. A semicolon, `;`,
+> can be used to separate two commands written on a single line.
 {: .callout}
 
-We can also use `-w` to get only the number of words,
-or `-c` to get only the number of characters.
+When the shell sees the keyword `for`,
+it knows to repeat a command (or group of commands) once for each item in a list.
+Each time the loop runs (called an iteration), an item in the list is assigned in sequence to
+the **variable**, and the commands inside the loop are executed, before moving on to
+the next item in the list.
+Inside the loop,
+we call for the variable's value by putting `$` in front of it.
+The `$` tells the shell interpreter to treat
+the variable as a variable name and substitute its value in its place,
+rather than treat it as text or an external command.
 
-Which of these files contains the fewest lines?
-It's an easy question to answer when there are only six files,
-but what if there were 6000?
-Our first step toward a solution is to run the command:
+In this example, the list is three filenames: `basilisk.dat`, `minotaur.dat`, and `unicorn.dat`.
+Each time the loop iterates, it will assign a file name to the variable `filename`
+and run the `head` command.
+The first time through the loop,
+`$filename` is `basilisk.dat`.
+The interpreter runs the command `head` on `basilisk.dat`
+and pipes the first two lines to the `tail` command,
+which then prints the second line of `basilisk.dat`.
+For the second iteration, `$filename` becomes
+`minotaur.dat`. This time, the shell runs `head` on `monotaur.dat`
+and pipes the first two lines to the `tail` command,
+which then prints the second line of `monotaur.dat`.
+For the third iteration, `$filename` becomes
+`unicorn.dat`, so the shell runs the `head` command on that file,
+and `tail` on the output of that.
+Since the list was only three items, the shell exits the `for` loop.
 
-~~~
-$ wc -l *.pdb > lengths.txt
-~~~
-{: .language-bash}
-
-The greater than symbol, `>`, tells the shell to **redirect** the command's output
-to a file instead of printing it to the screen. (This is why there is no screen output:
-everything that `wc` would have printed has gone into the
-file `lengths.txt` instead.)  The shell will create
-the file if it doesn't exist. If the file exists, it will be
-silently overwritten, which may lead to data loss and thus requires
-some caution.
-`ls lengths.txt` confirms that the file exists:
-
-~~~
-$ ls lengths.txt
-~~~
-{: .language-bash}
-
-~~~
-lengths.txt
-~~~
-{: .output}
-
-We can now send the content of `lengths.txt` to the screen using `cat lengths.txt`.
-The `cat` command gets its name from "concatenate" i.e. join together,
-and it prints the contents of files one after another.
-There's only one file in this case,
-so `cat` just shows us what it contains:
-
-~~~
-$ cat lengths.txt
-~~~
-{: .language-bash}
-
-~~~
-  20  cubane.pdb
-  12  ethane.pdb
-   9  methane.pdb
-  30  octane.pdb
-  21  pentane.pdb
-  15  propane.pdb
- 107  total
-~~~
-{: .output}
-
-> ## Output Page by Page
+> ## Same Symbols, Different Meanings
 >
-> We'll continue to use `cat` in this lesson, for convenience and consistency,
-> but it has the disadvantage that it always dumps the whole file onto your screen.
-> More useful in practice is the command `less`,
-> which you use with `less lengths.txt`.
-> This displays a screenful of the file, and then stops.
-> You can go forward one screenful by pressing the spacebar,
-> or back one by pressing `b`.  Press `q` to quit.
+> Here we see `>` being used a shell prompt, whereas `>` is also
+> used to redirect output.
+> Similarly, `$` is used as a shell prompt, but, as we saw earlier,
+> it is also used to ask the shell to get the value of a variable.
+>
+> If the *shell* prints `>` or `$` then it expects you to type something,
+> and the symbol is a prompt.
+>
+> If *you* type `>` or `$` yourself, it is an instruction from you that
+> the shell should redirect output or get the value of a variable.
 {: .callout}
 
-Now let's use the `sort` command to sort its contents.
+When using variables it is also
+possible to put the names into curly braces to clearly delimit the variable
+name: `$filename` is equivalent to `${filename}`, but is different from
+`${file}name`. You may find this notation in other people's programs.
 
-> ## What Does `sort -n` Do?
+We have called the variable in this loop `filename`
+in order to make its purpose clearer to human readers.
+The shell itself doesn't care what the variable is called;
+if we wrote this loop as:
+
+~~~
+$ for x in basilisk.dat minotaur.dat unicorn.dat
+> do
+>    head -n 2 $x | tail -n 1
+> done
+~~~
+{: .language-bash}
+
+or:
+
+~~~
+$ for temperature in basilisk.dat minotaur.dat unicorn.dat
+> do
+>    head -n 2 $temperature | tail -n 1
+> done
+~~~
+{: .language-bash}
+
+it would work exactly the same way.
+*Don't do this.*
+Programs are only useful if people can understand them,
+so meaningless names (like `x`) or misleading names (like `temperature`)
+increase the odds that the program won't do what its readers think it does.
+
+> ## Variables in Loops
 >
-> If we run `sort` on a file containing the following lines:
+> This exercise refers to the `data-shell/molecules` directory.
+> `ls` gives the following output:
 >
 > ~~~
-> 10
-> 2
-> 19
-> 22
-> 6
-> ~~~
-> {: .source}
->
-> the output is:
->
-> ~~~
-> 10
-> 19
-> 2
-> 22
-> 6
+> cubane.pdb  ethane.pdb  methane.pdb  octane.pdb  pentane.pdb  propane.pdb
 > ~~~
 > {: .output}
 >
-> If we run `sort -n` on the same input, we get this instead:
+> What is the output of the following code?
 >
 > ~~~
-> 2
-> 6
-> 10
-> 19
-> 22
-> ~~~
-> {: .output}
->
-> Explain why `-n` has this effect.
->
-> > ## Solution
-> > The `-n` option specifies a numerical rather than an alphanumerical sort.
-> {: .solution}
-{: .challenge}
-
-We will also use the `-n` option to specify that the sort is
-numerical instead of alphanumerical.
-This does *not* change the file;
-instead, it sends the sorted result to the screen:
-
-~~~
-$ sort -n lengths.txt
-~~~
-{: .language-bash}
-
-~~~
-  9  methane.pdb
- 12  ethane.pdb
- 15  propane.pdb
- 20  cubane.pdb
- 21  pentane.pdb
- 30  octane.pdb
-107  total
-~~~
-{: .output}
-
-We can put the sorted list of lines in another temporary file called `sorted-lengths.txt`
-by putting `> sorted-lengths.txt` after the command,
-just as we used `> lengths.txt` to put the output of `wc` into `lengths.txt`.
-Once we've done that,
-we can run another command called `head` to get the first few lines in `sorted-lengths.txt`:
-
-~~~
-$ sort -n lengths.txt > sorted-lengths.txt
-$ head -n 1 sorted-lengths.txt
-~~~
-{: .language-bash}
-
-~~~
-  9  methane.pdb
-~~~
-{: .output}
-
-Using `-n 1` with `head` tells it that
-we only want the first line of the file;
-`-n 20` would get the first 20,
-and so on.
-Since `sorted-lengths.txt` contains the lengths of our files ordered from least to greatest,
-the output of `head` must be the file with the fewest lines.
-
-> ## Redirecting to the same file
->
-> It's a very bad idea to try redirecting
-> the output of a command that operates on a file
-> to the same file. For example:
->
-> ~~~
-> $ sort -n lengths.txt > lengths.txt
+> $ for datafile in *.pdb
+> > do
+> >    ls *.pdb
+> > done
 > ~~~
 > {: .language-bash}
 >
-> Doing something like this may give you
-> incorrect results and/or delete
-> the contents of `lengths.txt`.
-{: .callout}
-
-> ## What Does `>>` Mean?
->
-> We have seen the use of `>`, but there is a similar operator `>>` which works slightly differently.
-> We'll learn about the differences between these two operators by printing some strings.
-> We can use the `echo` command to print strings e.g.
+> Now, what is the output of the following code?
 >
 > ~~~
-> $ echo The echo command prints text
-> ~~~
-> {: .language-bash}
-> ~~~
-> The echo command prints text
-> ~~~
-> {: .output}
->
-> Now test the commands below to reveal the difference between the two operators:
->
-> ~~~
-> $ echo hello > testfile01.txt
+> $ for datafile in *.pdb
+> > do
+> >	ls $datafile
+> > done
 > ~~~
 > {: .language-bash}
 >
-> and:
->
-> ~~~
-> $ echo hello >> testfile02.txt
-> ~~~
-> {: .language-bash}
->
-> Hint: Try executing each command twice in a row and then examining the output files.
+> Why do these two loops give different outputs?
 >
 > > ## Solution
-> > In the first example with `>`, the string "hello" is written to `testfile01.txt`,
-> > but the file gets overwritten each time we run the command.
-> >
-> > We see from the second example that the `>>` operator also writes "hello" to a file
-> > (in this case`testfile02.txt`),
-> > but appends the string to the file if it already exists (i.e. when we run it for the second time).
-> {: .solution}
-{: .challenge}
-
-> ## Appending Data
->
-> We have already met the `head` command, which prints lines from the start of a file.
-> `tail` is similar, but prints lines from the end of a file instead.
->
-> Consider the file `data-shell/data/animals.txt`.
-> After these commands, select the answer that
-> corresponds to the file `animals-subset.txt`:
->
-> ~~~
-> $ head -n 3 animals.txt > animals-subset.txt
-> $ tail -n 2 animals.txt >> animals-subset.txt
-> ~~~
-> {: .language-bash}
->
-> 1. The first three lines of `animals.txt`
-> 2. The last two lines of `animals.txt`
-> 3. The first three lines and the last two lines of `animals.txt`
-> 4. The second and third lines of `animals.txt`
->
-> > ## Solution
-> > Option 3 is correct.
-> > For option 1 to be correct we would only run the `head` command.
-> > For option 2 to be correct we would only run the `tail` command.
-> > For option 4 to be correct we would have to pipe the output of `head` into `tail -n 2` by doing `head -n 3 animals.txt | tail -n 2 > animals-subset.txt`
-> {: .solution}
-{: .challenge}
-
-If you think this is confusing,
-you're in good company:
-even once you understand what `wc`, `sort`, and `head` do,
-all those intermediate files make it hard to follow what's going on.
-We can make it easier to understand by running `sort` and `head` together:
-
-~~~
-$ sort -n lengths.txt | head -n 1
-~~~
-{: .language-bash}
-
-~~~
-  9  methane.pdb
-~~~
-{: .output}
-
-The vertical bar, `|`, between the two commands is called a **pipe**.
-It tells the shell that we want to use
-the output of the command on the left
-as the input to the command on the right.
-
-Nothing prevents us from chaining pipes consecutively.
-That is, we can for example send the output of `wc` directly to `sort`,
-and then the resulting output to `head`.
-Thus we first use a pipe to send the output of `wc` to `sort`:
-
-~~~
-$ wc -l *.pdb | sort -n
-~~~
-{: .language-bash}
-
-~~~
-   9 methane.pdb
-  12 ethane.pdb
-  15 propane.pdb
-  20 cubane.pdb
-  21 pentane.pdb
-  30 octane.pdb
- 107 total
-~~~
-{: .output}
-
-And now we send the output of this pipe, through another pipe, to `head`, so that the full pipeline becomes:
-
-~~~
-$ wc -l *.pdb | sort -n | head -n 1
-~~~
-{: .language-bash}
-
-~~~
-   9  methane.pdb
-~~~
-{: .output}
-
-This is exactly like a mathematician nesting functions like *log(3x)*
-and saying "the log of three times *x*".
-In our case,
-the calculation is "head of sort of line count of `*.pdb`".
-
-
-The redirection and pipes used in the last few commands are illustrated below:
-
-![Redirects and Pipes](../fig/redirects-and-pipes.png)
-
-> ## Piping Commands Together
->
-> In our current directory, we want to find the 3 files which have the least number of
-> lines. Which command listed below would work?
->
-> 1. `wc -l * > sort -n > head -n 3`
-> 2. `wc -l * | sort -n | head -n 1-3`
-> 3. `wc -l * | head -n 3 | sort -n`
-> 4. `wc -l * | sort -n | head -n 3`
->
-> > ## Solution
-> > Option 4 is the solution.
-> > The pipe character `|` is used to connect the output from one command to
-> > the input of another.
-> > `>` is used to redirect standard output to a file.
-> > Try it in the `data-shell/molecules` directory!
-> {: .solution}
-{: .challenge}
-
-> ## An example pipeline: Checking Files
->
-> There are 17 files from an assay in the `~/Desktop/data-shell/north-pacific-gyre/2012-07-03` directory 
-> Suppose you want to do some quick sanity checks on the content of the files. You know that files > are supposed to have 300 lines.
->
-> Starting by moving to that directory,
->
-> 1. How would you check if there are any files with fewer than 300 lines in the directory?
-> 2. How would you check if there are any files with more than 300 lines in the directory?
->
->
-> > ## Solution
-> > 1. `wc -l *.txt | sort -n | head -n 5`. You can report the number of lines of all the
-> > text files in the directory, sort them, and then get the top (if any files have fewer than 
-> > 300 lines they will appear here).
-> > 2. `wc -l *.txt | sort -n -r | head -n 5`. Same as above but now we want to sort the
-> > files in reverse order.
-> {: .solution}
-{: .challenge}
-
-This idea of linking programs together is why Unix has been so successful.
-Instead of creating enormous programs that try to do many different things,
-Unix programmers focus on creating lots of simple tools that each do one job well,
-and that work well with each other.
-This programming model is called "pipes and filters".
-We've already seen pipes;
-a **filter** is a program like `wc` or `sort`
-that transforms a stream of input into a stream of output.
-Almost all of the standard Unix tools can work this way:
-unless told to do otherwise,
-they read from standard input,
-do something with what they've read,
-and write to standard output.
-
-The key is that any program that reads lines of text from standard input
-and writes lines of text to standard output
-can be combined with every other program that behaves this way as well.
-You can *and should* write your programs this way
-so that you and other people can put those programs into pipes to multiply their power.
-
-
-> ## Pipe Reading Comprehension
->
-> A file called `animals.txt` (in the `data-shell/data` folder) contains the following data:
->
-> ~~~
-> 2012-11-05,deer
-> 2012-11-05,rabbit
-> 2012-11-05,raccoon
-> 2012-11-06,rabbit
-> 2012-11-06,deer
-> 2012-11-06,fox
-> 2012-11-07,rabbit
-> 2012-11-07,bear
-> ~~~
-> {: .source}
->
-> What text passes through each of the pipes and the final redirect in the pipeline below?
->
-> ~~~
-> $ cat animals.txt | head -n 5 | tail -n 3 | sort -r > final.txt
-> ~~~
-> {: .language-bash}
-> Hint: build the pipeline up one command at a time to test your understanding
-> > ## Solution
-> > The `head` command extracts the first 5 lines from `animals.txt`.
-> > Then, the last 3 lines are extracted from the previous 5 by using the `tail` command.
-> > With the `sort -r` command those 3 lines are sorted in reverse order and finally,
-> > the output is redirected to a file `final.txt`.
-> > The content of this file can be checked by executing `cat final.txt`.
-> > The file should contain the following lines:
+> > The first code block gives the same output on each iteration through
+> > the loop.
+> > Bash expands the wildcard `*.pdb` within the loop body (as well as
+> > before the loop starts) to match all files ending in `.pdb`
+> > and then lists them using `ls`.
+> > The expanded loop would look like this:
 > > ```
-> > 2012-11-06,rabbit
-> > 2012-11-06,deer
-> > 2012-11-05,raccoon
-> > ```
-> > {: .source}
-> {: .solution}
-{: .challenge}
-
-> ## Pipe Construction
->
-> For the file `animals.txt` from the previous exercise, consider the following command:
->
-> ~~~
-> $ cut -d , -f 2 animals.txt
-> ~~~
-> {: .language-bash}
->
-> The `cut` command is used to remove or "cut out" certain sections of each line in the file. The optional `-d` flag is used to define the delimiter. A **delimiter** is a character that is used to separate each line of text into columns. The default delimiter is <kbd>Tab</kbd>, meaning that the `cut` command will automatically assume that values in different columns will be separated by a tab. The `-f` flag is used to specify the field (column) to cut out.
-> The command above uses the `-d` option to split each line by comma, and the `-f` option
-> to print the second field in each line, to give the following output:
->
-> ~~~
-> deer
-> rabbit
-> raccoon
-> rabbit
-> deer
-> fox
-> rabbit
-> bear
-> ~~~
-> {: .output}
->
-> The `uniq` command filters out adjacent matching lines in a file.
-> How could you extend this pipeline (using `uniq` and another command) to find
-> out what animals the file contains (without any duplicates in their
-> names)?
->
-> > ## Solution
-> > ```
-> > $ cut -d , -f 2 animals.txt | sort | uniq
+> > $ for datafile in cubane.pdb  ethane.pdb  methane.pdb  octane.pdb  pentane.pdb  propane.pdb
+> > > do
+> > >	ls cubane.pdb  ethane.pdb  methane.pdb  octane.pdb  pentane.pdb  propane.pdb
+> > > done
 > > ```
 > > {: .language-bash}
+> >
+> > ```
+> > cubane.pdb  ethane.pdb  methane.pdb  octane.pdb  pentane.pdb  propane.pdb
+> > cubane.pdb  ethane.pdb  methane.pdb  octane.pdb  pentane.pdb  propane.pdb
+> > cubane.pdb  ethane.pdb  methane.pdb  octane.pdb  pentane.pdb  propane.pdb
+> > cubane.pdb  ethane.pdb  methane.pdb  octane.pdb  pentane.pdb  propane.pdb
+> > cubane.pdb  ethane.pdb  methane.pdb  octane.pdb  pentane.pdb  propane.pdb
+> > cubane.pdb  ethane.pdb  methane.pdb  octane.pdb  pentane.pdb  propane.pdb
+> > ```
+> > {: .output}
+> >
+> > The second code block lists a different file on each loop iteration.
+> > The value of the `datafile` variable is evaluated using `$datafile`,
+> > and then listed using `ls`.
+> >
+> > ```
+> > cubane.pdb
+> > ethane.pdb
+> > methane.pdb
+> > octane.pdb
+> > pentane.pdb
+> > propane.pdb
+> > ```
+> > {: .output}
 > {: .solution}
 {: .challenge}
 
-> ## Awk: a more powerful tool for text processing
+> ## Limiting Sets of Files
 >
-> We have seen the `cut` command that allows the selection of columns in tabular data.
-> If you need more powerful manipulation of tabular data you can use the command `awk`, which
-> permits more powerful operations (selection, calculations etc.) on columns. For more complex
-> operations, however, we recommend going to your favourite programming language!
-{: .callout}
-
-> ## Which Pipe?
->
-> The file `animals.txt` contains 8 lines of data formatted as follows:
+> What would be the output of running the following loop in the `data-shell/molecules` directory?
 >
 > ~~~
-> 2012-11-05,deer
-> 2012-11-05,rabbit
-> 2012-11-05,raccoon
-> 2012-11-06,rabbit
-> ...
+> $ for filename in c*
+> > do
+> >    ls $filename
+> > done
+> ~~~
+> {: .language-bash}
+>
+> 1.  No files are listed.
+> 2.  All files are listed.
+> 3.  Only `cubane.pdb`, `octane.pdb` and `pentane.pdb` are listed.
+> 4.  Only `cubane.pdb` is listed.
+>
+> > ## Solution
+> > 4 is the correct answer. `*` matches zero or more characters, so any file name starting with
+> > the letter c, followed by zero or more other characters will be matched.
+> {: .solution}
+>
+> How would the output differ from using this command instead?
+>
+> ~~~
+> $ for filename in *c*
+> > do
+> >    ls $filename
+> > done
+> ~~~
+> {: .language-bash}
+>
+> 1.  The same files would be listed.
+> 2.  All the files are listed this time.
+> 3.  No files are listed this time.
+> 4.  The files `cubane.pdb` and `octane.pdb` will be listed.
+> 5.  Only the file `octane.pdb` will be listed.
+>
+> > ## Solution
+> > 4 is the correct answer. `*` matches zero or more characters, so a file name with zero or more
+> > characters before a letter c and zero or more characters after the letter c will be matched.
+> {: .solution}
+{: .challenge}
+
+> ## Saving to a File in a Loop - Part One
+>
+> In the `data-shell/molecules` directory, what is the effect of this loop?
+>
+> ~~~
+> for alkanes in *.pdb
+> do
+>     echo $alkanes
+>     cat $alkanes > alkanes.pdb
+> done
+> ~~~
+> {: .language-bash}
+>
+> 1.  Prints `cubane.pdb`, `ethane.pdb`, `methane.pdb`, `octane.pdb`, `pentane.pdb` and `propane.pdb`,
+>     and the text from `propane.pdb` will be saved to a file called `alkanes.pdb`.
+> 2.  Prints `cubane.pdb`, `ethane.pdb`, and `methane.pdb`, and the text from all three files would be
+>     concatenated and saved to a file called `alkanes.pdb`.
+> 3.  Prints `cubane.pdb`, `ethane.pdb`, `methane.pdb`, `octane.pdb`, and `pentane.pdb`, and the text
+>     from `propane.pdb` will be saved to a file called `alkanes.pdb`.
+> 4.  None of the above.
+>
+> > ## Solution
+> > 1. The text from each file in turn gets written to the `alkanes.pdb` file.
+> > However, the file gets overwritten on each loop interation, so the final content of `alkanes.pdb`
+> > is the text from the `propane.pdb` file.
+> {: .solution}
+{: .challenge}
+
+> ## Saving to a File in a Loop - Part Two
+>
+> Also in the `data-shell/molecules` directory, what would be the output of the following loop?
+>
+> ~~~
+> for datafile in *.pdb
+> do
+>     cat $datafile >> all.pdb
+> done
+> ~~~
+> {: .language-bash}
+>
+> 1.  All of the text from `cubane.pdb`, `ethane.pdb`, `methane.pdb`, `octane.pdb`, and
+>     `pentane.pdb` would be concatenated and saved to a file called `all.pdb`.
+> 2.  The text from `ethane.pdb` will be saved to a file called `all.pdb`.
+> 3.  All of the text from `cubane.pdb`, `ethane.pdb`, `methane.pdb`, `octane.pdb`, `pentane.pdb`
+>     and `propane.pdb` would be concatenated and saved to a file called `all.pdb`.
+> 4.  All of the text from `cubane.pdb`, `ethane.pdb`, `methane.pdb`, `octane.pdb`, `pentane.pdb`
+>     and `propane.pdb` would be printed to the screen and saved to a file called `all.pdb`.
+>
+> > ## Solution
+> > 3 is the correct answer. `>>` appends to a file, rather than overwriting it with the redirected
+> > output from a command.
+> > Given the output from the `cat` command has been redirected, nothing is printed to the screen.
+> {: .solution}
+{: .challenge}
+
+Let's continue with our example in the `data-shell/creatures` directory.
+Here's a slightly more complicated loop:
+
+~~~
+$ for filename in *.dat
+> do
+>     echo $filename
+>     head -n 100 $filename | tail -n 20
+> done
+~~~
+{: .language-bash}
+
+The shell starts by expanding `*.dat` to create the list of files it will process.
+The **loop body**
+then executes two commands for each of those files.
+The first command, `echo`, prints its command-line arguments to standard output.
+For example:
+
+~~~
+$ echo hello there
+~~~
+{: .language-bash}
+
+prints:
+
+~~~
+hello there
+~~~
+{: .output}
+
+In this case,
+since the shell expands `$filename` to be the name of a file,
+`echo $filename` prints the name of the file.
+Note that we can't write this as:
+
+~~~
+$ for filename in *.dat
+> do
+>     $filename
+>     head -n 100 $filename | tail -n 20
+> done
+~~~
+{: .language-bash}
+
+because then the first time through the loop,
+when `$filename` expanded to `basilisk.dat`, the shell would try to run `basilisk.dat` as a program.
+Finally,
+the `head` and `tail` combination selects lines 81-100
+from whatever file is being processed
+(assuming the file has at least 100 lines).
+
+> ## Spaces in Names
+>
+> Spaces are used to separate the elements of the list
+> that we are going to loop over. If one of those elements
+> contains a space character, we need to surround it with
+> quotes, and do the same thing to our loop variable.
+> Suppose our data files are named:
+>
+> ~~~
+> red dragon.dat
+> purple unicorn.dat
+> ~~~
+> {: .source}
+>
+> To loop over these files, we would need to add double quotes like so:
+>
+> ~~~
+> $ for filename in "red dragon.dat" "purple unicorn.dat"
+> > do
+> >     head -n 100 "$filename" | tail -n 20
+> > done
+> ~~~
+> {: .language-bash}
+>
+> It is simpler to avoid using spaces (or other special characters) in filenames.
+>
+> The files above don't exist, so if we run the above code, the `head` command will be unable
+> to find them, however the error message returned will show the name of the files it is
+> expecting:
+> ```
+> head: cannot open ‘red dragon.dat’ for reading: No such file or directory
+> head: cannot open ‘purple unicorn.dat’ for reading: No such file or directory
+> ```
+> {: .output}
+> Try removing the quotes around `$filename` in the loop above to see the effect of the quote
+> marks on spaces. Note that we get a result from the loop command for unicorn.dat when we run this code in the `creatures` directory:
+> ```
+> head: cannot open ‘red’ for reading: No such file or directory
+> head: cannot open ‘dragon.dat’ for reading: No such file or directory
+> head: cannot open ‘purple’ for reading: No such file or directory
+> CGGTACCGAA
+> AAGGGTCGCG
+> CAAGTGTTCC
+> ```
+> {: . output}
+{: .callout}
+
+We would like to modify each of the files in `data-shell/creatures`, but also save a version
+of the original files, naming the copies `original-basilisk.dat` and `original-unicorn.dat`.
+We can't use:
+
+~~~
+$ cp *.dat original-*.dat
+~~~
+{: .language-bash}
+
+because that would expand to:
+
+~~~
+$ cp basilisk.dat minotaur.dat unicorn.dat original-*.dat
+~~~
+{: .language-bash}
+
+This wouldn't back up our files, instead we get an error:
+
+~~~
+cp: target `original-*.dat' is not a directory
+~~~
+{: .error}
+
+This problem arises when `cp` receives more than two inputs. When this happens, it
+expects the last input to be a directory where it can copy all the files it was passed.
+Since there is no directory named `original-*.dat` in the `creatures` directory we get an
+error.
+
+Instead, we can use a loop:
+~~~
+$ for filename in *.dat
+> do
+>     cp $filename original-$filename
+> done
+~~~
+{: .language-bash}
+
+This loop runs the `cp` command once for each filename.
+The first time,
+when `$filename` expands to `basilisk.dat`,
+the shell executes:
+
+~~~
+cp basilisk.dat original-basilisk.dat
+~~~
+{: .language-bash}
+
+The second time, the command is:
+
+~~~
+cp minotaur.dat original-minotaur.dat
+~~~
+{: .language-bash}
+
+The third and last time, the command is:
+
+~~~
+cp unicorn.dat original-unicorn.dat
+~~~
+{: .language-bash}
+
+Since the `cp` command does not normally produce any output, it's hard to check
+that the loop is doing the correct thing.
+However, we learned earlier how to print strings using `echo`, and we can modify the loop
+to use `echo` to print our commands without actually executing them.
+As such we can check what commands *would be* run in the unmodified loop.
+
+The following diagram
+shows what happens when the modified loop is executed, and demonstrates how the
+judicious use of `echo` is a good debugging technique.
+
+![For Loop in Action](../fig/shell_script_for_loop_flow_chart.svg)
+
+## Nelle's Pipeline: Processing Files
+
+Nelle is now ready to process her data files using `goostats` --- a shell script written by her supervisor.
+This calculates some statistics from a protein sample file, and takes two arguments:
+
+1. an input file (containing the raw data)
+2. an output file (to store the calculated statistics)
+
+Since she's still learning how to use the shell,
+she decides to build up the required commands in stages.
+Her first step is to make sure that she can select the right input files --- remember,
+these are ones whose names end in 'A' or 'B', rather than 'Z'. Starting from her home directory, Nelle types:
+
+~~~
+$ cd north-pacific-gyre/2012-07-03
+$ for datafile in NENE*[AB].txt
+> do
+>     echo $datafile
+> done
+~~~
+{: .language-bash}
+
+~~~
+NENE01729A.txt
+NENE01729B.txt
+NENE01736A.txt
+...
+NENE02043A.txt
+NENE02043B.txt
+~~~
+{: .output}
+
+Her next step is to decide
+what to call the files that the `goostats` analysis program will create.
+Prefixing each input file's name with 'stats' seems simple,
+so she modifies her loop to do that:
+
+~~~
+$ for datafile in NENE*[AB].txt
+> do
+>     echo $datafile stats-$datafile
+> done
+~~~
+{: .language-bash}
+
+~~~
+NENE01729A.txt stats-NENE01729A.txt
+NENE01729B.txt stats-NENE01729B.txt
+NENE01736A.txt stats-NENE01736A.txt
+...
+NENE02043A.txt stats-NENE02043A.txt
+NENE02043B.txt stats-NENE02043B.txt
+~~~
+{: .output}
+
+She hasn't actually run `goostats` yet,
+but now she's sure she can select the right files and generate the right output filenames.
+
+Typing in commands over and over again is becoming tedious,
+though,
+and Nelle is worried about making mistakes,
+so instead of re-entering her loop,
+she presses the up arrow.
+In response,
+the shell redisplays the whole loop on one line
+(using semi-colons to separate the pieces):
+
+~~~
+$ for datafile in NENE*[AB].txt; do echo $datafile stats-$datafile; done
+~~~
+{: .language-bash}
+
+Using the left arrow key,
+Nelle backs up and changes the command `echo` to `bash goostats`:
+
+~~~
+$ for datafile in NENE*[AB].txt; do bash goostats $datafile stats-$datafile; done
+~~~
+{: .language-bash}
+
+When she presses <kbd>Enter</kbd>,
+the shell runs the modified command.
+However, nothing appears to happen --- there is no output.
+After a moment, Nelle realizes that since her script doesn't print anything to the screen any longer,
+she has no idea whether it is running, much less how quickly.
+She kills the running command by typing `Ctrl-C`,
+uses up-arrow to repeat the command,
+and edits it to read:
+
+~~~
+$ for datafile in NENE*[AB].txt; do echo $datafile; bash goostats $datafile stats-$datafile; done
+~~~
+{: .language-bash}
+
+> ## Beginning and End
+>
+> We can move to the beginning of a line in the shell by typing `Ctrl-a`
+> and to the end using `Ctrl-e`.
+{: .callout}
+
+When she runs her program now,
+it produces one line of output every five seconds or so:
+
+~~~
+NENE01729A.txt
+NENE01729B.txt
+NENE01736A.txt
+...
+~~~
+{: .output}
+
+1518 times 5 seconds,
+divided by 60,
+tells her that her script will take about two hours to run.
+As a final check,
+she opens another terminal window,
+goes into `north-pacific-gyre/2012-07-03`,
+and uses `cat stats-NENE01729B.txt`
+to examine one of the output files.
+It looks good,
+so she decides to get some coffee and catch up on her reading.
+
+> ## Those Who Know History Can Choose to Repeat It
+>
+> Another way to repeat previous work is to use the `history` command to
+> get a list of the last few hundred commands that have been executed, and
+> then to use `!123` (where '123' is replaced by the command number) to
+> repeat one of those commands. For example, if Nelle types this:
+>
+> ~~~
+> $ history | tail -n 5
+> ~~~
+> {: .language-bash}
+> ~~~
+>   456  ls -l NENE0*.txt
+>   457  rm stats-NENE01729B.txt.txt
+>   458  bash goostats NENE01729B.txt stats-NENE01729B.txt
+>   459  ls -l NENE0*.txt
+>   460  history
 > ~~~
 > {: .output}
 >
-> The `uniq` command has a `-c` option which gives a count of the
-> number of times a line occurs in its input.  Assuming your current
-> directory is `data-shell/data/`, what command would you use to produce
-> a table that shows the total count of each type of animal in the file?
->
-> 1.  `sort animals.txt | uniq -c`
-> 2.  `sort -t, -k2,2 animals.txt | uniq -c`
-> 3.  `cut -d, -f 2 animals.txt | uniq -c`
-> 4.  `cut -d, -f 2 animals.txt | sort | uniq -c`
-> 5.  `cut -d, -f 2 animals.txt | sort | uniq -c | wc -l`
->
-> > ## Solution
-> > Option 4. is the correct answer.
-> > If you have difficulty understanding why, try running the commands, or sub-sections of
-> > the pipelines (make sure you are in the `data-shell/data` directory).
-> {: .solution}
-{: .challenge}
+> then she can re-run `goostats` on `NENE01729B.txt` simply by typing
+> `!458`.
+{: .callout}
 
-> ## Filtering by patterns
-> `grep` is another command that searches for patterns in text. Patterns could be simple 
-> text or a combination of text and the wildcard characters we have seen before like ? and *. Like > other commands we have seen `grep` can be used on multiple files. 
-> For example if we wanted to find all occurences of name in all the text files we could write:
+> ## Other History Commands
 >
-> ```
-> $ grep "name" *.txt
-> ```
+> There are a number of other shortcut commands for getting at the history.
+>
+> - `Ctrl-R` enters a history search mode 'reverse-i-search' and finds the
+> most recent command in your history that matches the text you enter next.
+> Press `Ctrl-R` one or more additional times to search for earlier matches.
+> - `!!` retrieves the immediately preceding command
+> (you may or may not find this more convenient than using the up-arrow)
+> - `!$` retrieves the last word of the last command.
+> That's useful more often than you might expect: after
+> `bash goostats NENE01729B.txt stats-NENE01729B.txt`, you can type
+> `less !$` to look at the file `stats-NENE01729B.txt`, which is
+> quicker than doing up-arrow and editing the command-line.
+{: .callout}
+
+> ## Doing a Dry Run
+>
+> A loop is a way to do many things at once --- or to make many mistakes at
+> once if it does the wrong thing. One way to check what a loop *would* do
+> is to `echo` the commands it would run instead of actually running them.
+>
+> Suppose we want to preview the commands the following loop will execute
+> without actually running those commands:
+>
+> ~~~
+> $ for file in *.pdb
+> > do
+> >   analyze $file > analyzed-$file
+> > done
+> ~~~
 > {: .language-bash}
 >
+> What is the difference between the two loops below, and which one would we
+> want to run?
 >
-> Using the `animals.txt` file suppose we wanted to copy all the rabbit dates to a separate file `rabbit-dates.txt`. 
-> Which combination of commands would achieve this?
+> ~~~
+> # Version 1
+> $ for file in *.pdb
+> > do
+> >   echo analyze $file > analyzed-$file
+> > done
+> ~~~
+> {: .language-bash}
 >
+> ~~~
+> # Version 2
+> $ for file in *.pdb
+> > do
+> >   echo "analyze $file > analyzed-$file"
+> > done
+> ~~~
+> {: .language-bash}
 >
 > > ## Solution
-> > grep "rabbit" animals.txt | cut -d, -f 1 > rabbit-dates.txt
+> > The second version is the one we want to run.
+> > This prints to screen everything enclosed in the quote marks, expanding the
+> > loop variable name because we have prefixed it with a dollar sign.
+> >
+> > The first version redirects the output from the command `echo analyze $file` to
+> > a file, `analyzed-$file`. A series of files is generated: `analyzed-cubane.pdb`,
+> > `analyzed-ethane.pdb` etc.
+> >
+> > Try both versions for yourself to see the output! Be sure to open the
+> > `analyzed-*.pdb` files to view their contents.
 > {: .solution}
 {: .challenge}
 
-
-
-
-
-
-
+> ## Nested Loops
+>
+> Suppose we want to set up up a directory structure to organize
+> some experiments measuring reaction rate constants with different compounds
+> *and* different temperatures.  What would be the
+> result of the following code:
+>
+> ~~~
+> $ for species in cubane ethane methane
+> > do
+> >     for temperature in 25 30 37 40
+> >     do
+> >         mkdir $species-$temperature
+> >     done
+> > done
+> ~~~
+> {: .language-bash}
+>
+> > ## Solution
+> > We have a nested loop, i.e. contained within another loop, so for each species
+> > in the outer loop, the inner loop (the nested loop) iterates over the list of
+> > temperatures, and creates a new directory for each combination.
+> >
+> > Try running the code for yourself to see which directories are created!
+> {: .solution}
+{: .challenge}
