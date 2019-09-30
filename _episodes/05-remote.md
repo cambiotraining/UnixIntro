@@ -280,14 +280,35 @@ It's also worth noting that this isn't the only way to mount remote directories 
 
 ## Wget - Accessing web resources
 
+Wget is in a different category of command compared to the others in this section. It is mainly for accessing resources that can be downloaded over http(s) and doesn't have a mechanism for uploading/pushing files.
 
+Whilst this tool can be customised to do a wide range of tasks at its simplest it can be used to download datasets for processing at the start of a processing pipeline.
 
+The data for this course can be downloaded as follows
 
+~~~
+$ wget https://github.com/cambiotraining/UnixIntro/raw/master/data/data-shell.zip
+~~~
+{: .language-bash}
 
+~~~
+--2019-09-30 08:28:50--  https://github.com/cambiotraining/UnixIntro/raw/master/data/data-shell.zip
+Resolving github.com (github.com)... 140.82.118.3
+Connecting to github.com (github.com)|140.82.118.3|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://raw.githubusercontent.com/cambiotraining/UnixIntro/master/data/data-shell.zip [following]
+--2019-09-30 08:28:50--  https://raw.githubusercontent.com/cambiotraining/UnixIntro/master/data/data-shell.zip
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 151.101.16.133
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|151.101.16.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 580102 (567K) [application/zip]
+Saving to: ‘data-shell.zip’
 
+data-shell.zip      100%[===================>] 566.51K  --.-KB/s    in 0.05s   
 
-
-
+2019-09-30 08:28:51 (11.8 MB/s) - ‘data-shell.zip’ saved [580102/580102]
+~~~
+{: .output}
 
 
 
