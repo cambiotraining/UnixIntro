@@ -1,5 +1,5 @@
 ---
-title: "Combining commands"
+title: "Automating work in bash"
 teaching: 45
 exercises: 30
 questions:
