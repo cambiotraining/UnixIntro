@@ -1,7 +1,7 @@
 ---
 title: "Using remote resources"
-teaching: 45
-exercises: 30
+teaching: 15
+exercises: 15
 questions:
 - "How can I work on the unix shell of a remote computer:"
 - "How can I move files between computers"
@@ -132,451 +132,71 @@ Success!
 > {: .solution}
 {: .challenge}
 
+##Managing multiple remote files
 
-> ## Output Page by Page
->
-> We'll continue to use `cat` in this lesson, for convenience and consistency,
-> but it has the disadvantage that it always dumps the whole file onto your screen.
-> More useful in practice is the command `less`,
-> which you use with `less lengths.txt`.
-> This displays a screenful of the file, and then stops.
-> You can go forward one screenful by pressing the spacebar,
-> or back one by pressing `b`.  Press `q` to quit.
-{: .callout}
-
-Now let's use the `sort` command to sort its contents.
-
-> ## What Does `sort -n` Do?
->
-> If we run `sort` on a file containing the following lines:
->
-> ~~~
-> 10
-> 2
-> 19
-> 22
-> 6
-> ~~~
-> {: .source}
->
-> the output is:
->
-> ~~~
-> 10
-> 19
-> 2
-> 22
-> 6
-> ~~~
-> {: .output}
->
-> If we run `sort -n` on the same input, we get this instead:
->
-> ~~~
-> 2
-> 6
-> 10
-> 19
-> 22
-> ~~~
-> {: .output}
->
-> Explain why `-n` has this effect.
->
-> > ## Solution
-> > The `-n` option specifies a numerical rather than an alphanumerical sort.
-> {: .solution}
-{: .challenge}
-
-We will also use the `-n` option to specify that the sort is
-numerical instead of alphanumerical.
-This does *not* change the file;
-instead, it sends the sorted result to the screen:
+Sometimes we need to manage a large number of files across two locations, often maintaining a specific directory structure. `scp` can handle this with it's `-r` flag. Just like `cp` this puts the command in recursive mode allowing it to copy entire directories of files
 
 ~~~
-$ sort -n lengths.txt
+$ scp -r -P 8890 workflow/ sshuser@127.0.0.1:/home/sshuser
 ~~~
 {: .language-bash}
 
 ~~~
-  9  methane.pdb
- 12  ethane.pdb
- 15  propane.pdb
- 20  cubane.pdb
- 21  pentane.pdb
- 30  octane.pdb
-107  total
+.run_alignment.sh.swp                         100%   12KB   7.5MB/s   00:00    
+ecoli_rel606.fasta.amb                        100%   12    12.0KB/s   00:00    
+ecoli_rel606.fasta.rbwt                       100% 1696KB 162.6MB/s   00:00    
+ecoli_rel606.fasta.rpac                       100% 1130KB 312.5MB/s   00:00    
+ecoli_rel606.fasta.ann                        100%   87   431.4KB/s   00:00    
+ecoli_rel606.fasta.bwt                        100% 1696KB 325.9MB/s   00:00    
+ecoli_rel606.fasta.rsa                        100%  565KB 289.3MB/s   00:00    
+ecoli_rel606.fasta                            100% 4578KB 331.4MB/s   00:00    
+ecoli_rel606.fasta.sa                         100%  565KB 294.5MB/s   00:00    
+ecoli_rel606.fasta.pac                        100% 1130KB 309.9MB/s   00:00    
+ecoli_rel606.fasta.fai                        100%   29    78.3KB/s   00:00    
+run_alignment.sh                              100% 1143     4.1MB/s   00:00    
+SRR000011.fastq                               100%  128KB 223.8MB/s   00:00    
+SRR000013.fastq                               100%  128KB 273.4MB/s   00:00    
+SRR000016.fastq                               100%  140KB 188.2MB/s   00:00    
+SRR000012.fastq                               100%  128KB 162.7MB/s   00:00    
+SRR000015.fastq                               100%  128KB 170.5MB/s   00:00    
+SRR000014.fastq                               100%  139KB 226.5MB/s   00:00 
 ~~~
 {: .output}
 
-We can put the sorted list of lines in another temporary file called `sorted-lengths.txt`
-by putting `> sorted-lengths.txt` after the command,
-just as we used `> lengths.txt` to put the output of `wc` into `lengths.txt`.
-Once we've done that,
-we can run another command called `head` to get the first few lines in `sorted-lengths.txt`:
+However `scp` isn't always the best tool to use for managing this kind of operation.
+
+When you run `scp` it copies the entirety of every single file you specify. For an initial copy this is probably what you want, but if you change only a few files and want to synchronize the server copy to keep up with your changes it wouldn't make sense to copy the entire directory structure again.
+
+For this scenario `rsync` can be an excellent tool.
+
+## rsync
+
+First lets add some new files to our `workflow` directory using the `touch` command. This command does nothing but create an empty file or update the timestamp of an existing file.
 
 ~~~
-$ sort -n lengths.txt > sorted-lengths.txt
-$ head -n 1 sorted-lengths.txt
+$ touch workflow/newfile1 workflow/newfile2 workflow/newfile3
 ~~~
 {: .language-bash}
 
-~~~
-  9  methane.pdb
-~~~
-{: .output}
+`rsync` is already set up on our local computer, but as the remote server is a fresh install we'll need to add it (although you can generally expect it to be installed as default).
 
-Using `-n 1` with `head` tells it that
-we only want the first line of the file;
-`-n 20` would get the first 20,
-and so on.
-Since `sorted-lengths.txt` contains the lengths of our files ordered from least to greatest,
-the output of `head` must be the file with the fewest lines.
-
-> ## Redirecting to the same file
->
-> It's a very bad idea to try redirecting
-> the output of a command that operates on a file
-> to the same file. For example:
->
-> ~~~
-> $ sort -n lengths.txt > lengths.txt
-> ~~~
-> {: .language-bash}
->
-> Doing something like this may give you
-> incorrect results and/or delete
-> the contents of `lengths.txt`.
-{: .callout}
-
-> ## What Does `>>` Mean?
->
-> We have seen the use of `>`, but there is a similar operator `>>` which works slightly differently.
-> We'll learn about the differences between these two operators by printing some strings.
-> We can use the `echo` command to print strings e.g.
->
-> ~~~
-> $ echo The echo command prints text
-> ~~~
-> {: .language-bash}
-> ~~~
-> The echo command prints text
-> ~~~
-> {: .output}
->
-> Now test the commands below to reveal the difference between the two operators:
->
-> ~~~
-> $ echo hello > testfile01.txt
-> ~~~
-> {: .language-bash}
->
-> and:
->
-> ~~~
-> $ echo hello >> testfile02.txt
-> ~~~
-> {: .language-bash}
->
-> Hint: Try executing each command twice in a row and then examining the output files.
->
-> > ## Solution
-> > In the first example with `>`, the string "hello" is written to `testfile01.txt`,
-> > but the file gets overwritten each time we run the command.
-> >
-> > We see from the second example that the `>>` operator also writes "hello" to a file
-> > (in this case`testfile02.txt`),
-> > but appends the string to the file if it already exists (i.e. when we run it for the second time).
-> {: .solution}
-{: .challenge}
-
-> ## Appending Data
->
-> We have already met the `head` command, which prints lines from the start of a file.
-> `tail` is similar, but prints lines from the end of a file instead.
->
-> Consider the file `data-shell/data/animals.txt`.
-> After these commands, select the answer that
-> corresponds to the file `animals-subset.txt`:
->
-> ~~~
-> $ head -n 3 animals.txt > animals-subset.txt
-> $ tail -n 2 animals.txt >> animals-subset.txt
-> ~~~
-> {: .language-bash}
->
-> 1. The first three lines of `animals.txt`
-> 2. The last two lines of `animals.txt`
-> 3. The first three lines and the last two lines of `animals.txt`
-> 4. The second and third lines of `animals.txt`
->
-> > ## Solution
-> > Option 3 is correct.
-> > For option 1 to be correct we would only run the `head` command.
-> > For option 2 to be correct we would only run the `tail` command.
-> > For option 4 to be correct we would have to pipe the output of `head` into `tail -n 2` by doing `head -n 3 animals.txt | tail -n 2 > animals-subset.txt`
-> {: .solution}
-{: .challenge}
-
-If you think this is confusing,
-you're in good company:
-even once you understand what `wc`, `sort`, and `head` do,
-all those intermediate files make it hard to follow what's going on.
-We can make it easier to understand by running `sort` and `head` together:
+We need to first ssh to the remote server and then issue a command to add `rsync` as follows.
 
 ~~~
-$ sort -n lengths.txt | head -n 1
+$ ssh -p 8890 sshuser@127.0.0.1
+$ sudo apt -y install rsync
 ~~~
-{: .language-bash}
-
-~~~
-  9  methane.pdb
-~~~
-{: .output}
-
-The vertical bar, `|`, between the two commands is called a **pipe**.
-It tells the shell that we want to use
-the output of the command on the left
-as the input to the command on the right.
-
-Nothing prevents us from chaining pipes consecutively.
-That is, we can for example send the output of `wc` directly to `sort`,
-and then the resulting output to `head`.
-Thus we first use a pipe to send the output of `wc` to `sort`:
-
-~~~
-$ wc -l *.pdb | sort -n
-~~~
-{: .language-bash}
-
-~~~
-   9 methane.pdb
-  12 ethane.pdb
-  15 propane.pdb
-  20 cubane.pdb
-  21 pentane.pdb
-  30 octane.pdb
- 107 total
-~~~
-{: .output}
-
-And now we send the output of this pipe, through another pipe, to `head`, so that the full pipeline becomes:
-
-~~~
-$ wc -l *.pdb | sort -n | head -n 1
-~~~
-{: .language-bash}
-
-~~~
-   9  methane.pdb
-~~~
-{: .output}
-
-This is exactly like a mathematician nesting functions like *log(3x)*
-and saying "the log of three times *x*".
-In our case,
-the calculation is "head of sort of line count of `*.pdb`".
+Finally Ctrl+D to exit.
 
 
-The redirection and pipes used in the last few commands are illustrated below:
-
-![Redirects and Pipes](../fig/redirects-and-pipes.png)
-
-> ## Piping Commands Together
->
-> In our current directory, we want to find the 3 files which have the least number of
-> lines. Which command listed below would work?
->
-> 1. `wc -l * > sort -n > head -n 3`
-> 2. `wc -l * | sort -n | head -n 1-3`
-> 3. `wc -l * | head -n 3 | sort -n`
-> 4. `wc -l * | sort -n | head -n 3`
->
-> > ## Solution
-> > Option 4 is the solution.
-> > The pipe character `|` is used to connect the output from one command to
-> > the input of another.
-> > `>` is used to redirect standard output to a file.
-> > Try it in the `data-shell/molecules` directory!
-> {: .solution}
-{: .challenge}
-
-> ## An example pipeline: Checking Files
->
-> There are 17 files from an assay in the `~/Desktop/data-shell/north-pacific-gyre/2012-07-03` directory 
-> Suppose you want to do some quick sanity checks on the content of the files. You know that files > are supposed to have 300 lines.
->
-> Starting by moving to that directory,
->
-> 1. How would you check if there are any files with fewer than 300 lines in the directory?
-> 2. How would you check if there are any files with more than 300 lines in the directory?
->
->
-> > ## Solution
-> > 1. `wc -l *.txt | sort -n | head -n 5`. You can report the number of lines of all the
-> > text files in the directory, sort them, and then get the top (if any files have fewer than 
-> > 300 lines they will appear here).
-> > 2. `wc -l *.txt | sort -n -r | head -n 5`. Same as above but now we want to sort the
-> > files in reverse order.
-> {: .solution}
-{: .challenge}
-
-This idea of linking programs together is why Unix has been so successful.
-Instead of creating enormous programs that try to do many different things,
-Unix programmers focus on creating lots of simple tools that each do one job well,
-and that work well with each other.
-This programming model is called "pipes and filters".
-We've already seen pipes;
-a **filter** is a program like `wc` or `sort`
-that transforms a stream of input into a stream of output.
-Almost all of the standard Unix tools can work this way:
-unless told to do otherwise,
-they read from standard input,
-do something with what they've read,
-and write to standard output.
-
-The key is that any program that reads lines of text from standard input
-and writes lines of text to standard output
-can be combined with every other program that behaves this way as well.
-You can *and should* write your programs this way
-so that you and other people can put those programs into pipes to multiply their power.
 
 
-> ## Pipe Reading Comprehension
->
-> A file called `animals.txt` (in the `data-shell/data` folder) contains the following data:
->
-> ~~~
-> 2012-11-05,deer
-> 2012-11-05,rabbit
-> 2012-11-05,raccoon
-> 2012-11-06,rabbit
-> 2012-11-06,deer
-> 2012-11-06,fox
-> 2012-11-07,rabbit
-> 2012-11-07,bear
-> ~~~
-> {: .source}
->
-> What text passes through each of the pipes and the final redirect in the pipeline below?
->
-> ~~~
-> $ cat animals.txt | head -n 5 | tail -n 3 | sort -r > final.txt
-> ~~~
-> {: .language-bash}
-> Hint: build the pipeline up one command at a time to test your understanding
-> > ## Solution
-> > The `head` command extracts the first 5 lines from `animals.txt`.
-> > Then, the last 3 lines are extracted from the previous 5 by using the `tail` command.
-> > With the `sort -r` command those 3 lines are sorted in reverse order and finally,
-> > the output is redirected to a file `final.txt`.
-> > The content of this file can be checked by executing `cat final.txt`.
-> > The file should contain the following lines:
-> > ```
-> > 2012-11-06,rabbit
-> > 2012-11-06,deer
-> > 2012-11-05,raccoon
-> > ```
-> > {: .source}
-> {: .solution}
-{: .challenge}
+## Wget - Accessing web resources
 
-> ## Pipe Construction
->
-> For the file `animals.txt` from the previous exercise, consider the following command:
->
-> ~~~
-> $ cut -d , -f 2 animals.txt
-> ~~~
-> {: .language-bash}
->
-> The `cut` command is used to remove or "cut out" certain sections of each line in the file. The optional `-d` flag is used to define the delimiter. A **delimiter** is a character that is used to separate each line of text into columns. The default delimiter is <kbd>Tab</kbd>, meaning that the `cut` command will automatically assume that values in different columns will be separated by a tab. The `-f` flag is used to specify the field (column) to cut out.
-> The command above uses the `-d` option to split each line by comma, and the `-f` option
-> to print the second field in each line, to give the following output:
->
-> ~~~
-> deer
-> rabbit
-> raccoon
-> rabbit
-> deer
-> fox
-> rabbit
-> bear
-> ~~~
-> {: .output}
->
-> The `uniq` command filters out adjacent matching lines in a file.
-> How could you extend this pipeline (using `uniq` and another command) to find
-> out what animals the file contains (without any duplicates in their
-> names)?
->
-> > ## Solution
-> > ```
-> > $ cut -d , -f 2 animals.txt | sort | uniq
-> > ```
-> > {: .language-bash}
-> {: .solution}
-{: .challenge}
 
-> ## Awk: a more powerful tool for text processing
->
-> We have seen the `cut` command that allows the selection of columns in tabular data.
-> If you need more powerful manipulation of tabular data you can use the command `awk`, which
-> permits more powerful operations (selection, calculations etc.) on columns. For more complex
-> operations, however, we recommend going to your favourite programming language!
-{: .callout}
 
-> ## Which Pipe?
->
-> The file `animals.txt` contains 8 lines of data formatted as follows:
->
-> ~~~
-> 2012-11-05,deer
-> 2012-11-05,rabbit
-> 2012-11-05,raccoon
-> 2012-11-06,rabbit
-> ...
-> ~~~
-> {: .output}
->
-> The `uniq` command has a `-c` option which gives a count of the
-> number of times a line occurs in its input.  Assuming your current
-> directory is `data-shell/data/`, what command would you use to produce
-> a table that shows the total count of each type of animal in the file?
->
-> 1.  `sort animals.txt | uniq -c`
-> 2.  `sort -t, -k2,2 animals.txt | uniq -c`
-> 3.  `cut -d, -f 2 animals.txt | uniq -c`
-> 4.  `cut -d, -f 2 animals.txt | sort | uniq -c`
-> 5.  `cut -d, -f 2 animals.txt | sort | uniq -c | wc -l`
->
-> > ## Solution
-> > Option 4. is the correct answer.
-> > If you have difficulty understanding why, try running the commands, or sub-sections of
-> > the pipelines (make sure you are in the `data-shell/data` directory).
-> {: .solution}
-{: .challenge}
 
-> ## Filtering by patterns
-> `grep` is another command that searches for patterns in text. Patterns could be simple 
-> text or a combination of text and the wildcard characters we have seen before like ? and *. Like > other commands we have seen `grep` can be used on multiple files. 
-> For example if we wanted to find all occurences of name in all the text files we could write:
->
-> ```
-> $ grep "name" *.txt
-> ```
-> {: .language-bash}
->
->
-> Using the `animals.txt` file suppose we wanted to copy all the rabbit dates to a separate file `rabbit-dates.txt`. 
-> Which combination of commands would achieve this?
->
->
-> > ## Solution
-> > grep "rabbit" animals.txt | cut -d, -f 1 > rabbit-dates.txt
-> {: .solution}
-{: .challenge}
+
 
 
 
