@@ -15,99 +15,60 @@ keypoints:
 - "`rsync` a different method of file transfer which only copies files that have changed"
 - "`wget` a command which can download files from http links as if it were in a browser"
 ---
+Let’s take a closer look at what happens when we use the shell on a desktop or laptop computer. The first step is to log in so that the operating system knows who we are and what we’re allowed to do. We do this by typing our username and password; the operating system checks those values against its records, and if they match, runs a shell for us.
 
-Now that we know a few basic commands,
-we can finally look at the shell's most powerful feature:
-the ease with which it lets us combine existing programs in new ways.
-We'll start with a directory called `molecules`
-that contains six files describing some simple organic molecules.
-The `.pdb` extension indicates that these files are in Protein Data Bank format,
-a simple text format that specifies the type and position of each atom in the molecule.
+As we type commands, the 1’s and 0’s that represent the characters we’re typing are sent from the keyboard to the shell. The shell displays those characters on the screen to represent what we type, and then, if what we typed was a command, the shell executes it and displays its output (if any).
 
-~~~
-$ ls molecules
-~~~
-{: .language-bash}
+What if we want to run some commands on another machine, such as the server in the basement that manages our database of experimental results? To do this, we have to first log in to that machine. We call this a remote login.
 
-~~~
-cubane.pdb    ethane.pdb    methane.pdb
-octane.pdb    pentane.pdb   propane.pdb
-~~~
-{: .output}
+In order for us to be able to login, the remote computer must be running a remote login server and we will run a client program that can talk to that server. The client program passes our login credentials to the remote login server and, if we are allowed to login, that server then runs a shell for us on the remote computer.
 
-Let's go into that directory with `cd` and run the command `wc *.pdb`.
-`wc` is the "word count" command:
-it counts the number of lines, words, and characters in files (from left to right, in that order).
+Once our local client is connected to the remote server, everything we type into the client is passed on, by the server, to the shell running on the remote computer. That remote shell runs those commands on our behalf, just as a local shell would, then sends back output, via the server, to our client, for our computer to display.
 
-The `*` in `*.pdb` matches zero or more characters,
-so the shell turns `*.pdb` into a list of all `.pdb` files in the current directory:
+## The ssh protocol
+
+SSH is a protocol which allows us to send secure encrypted information across an unsecured network, like the internet. The underlying protocol supports a number of commands we can use to move information of different types in different ways. The simplest and most straightforward is the `ssh` command which facilitates a remote login session connecting our local user and shell to any remote user we have permission to access.
 
 ~~~
-$ cd molecules
-$ wc *.pdb
+$ ssh sshuser@127.0.0.1 -p 8890
 ~~~
 {: .language-bash}
 
+The first argument specifies the location of the remote machine (by IP address or a URL) as well as the user we want to connect to seperated by an `@` sign. For the purpose of this course we've set up a container on your local machine for you to connect to the IP address `127.0.0.1` is actually reserved for your local computer.
+
+We also specify the port to look for the ssh server on with `-p 8890`. Most network based services listen for connections on a specific numbered port for ssh the default is 22. However, a common security measure is to change the port ssh is listening on to avoid opportunistic connections. In our case we are using 8890 to avoid conflict with the existing ssh server used on your computer for administration.
+
 ~~~
-  20  156  1158  cubane.pdb
-  12  84   622   ethane.pdb
-   9  57   422   methane.pdb
-  30  246  1828  octane.pdb
-  21  165  1226  pentane.pdb
-  15  111  825   propane.pdb
- 107  819  6081  total
+The authenticity of host '[127.0.0.1]:8890 ([127.0.0.1]:8890)' can't be established.
+ECDSA key fingerprint is SHA256:v9X5DCaGtI0mSF79Krmhx3g8AbMQqVAhg6hHEjdexho.
+Are you sure you want to continue connecting (yes/no)? yes
 ~~~
 {: .output}
 
-
-
-If we run `wc -l` instead of just `wc`,
-the output shows only the number of lines per file:
+When you connect to a computer for the first time you should see a warning like the one above. This signifies that the computer is trying to prove it's identity by sending a fingerprint which relates to a key that only it knows. Depending on the security of the server you are connecting to they might distribute the fingerprint ahead of time for you to compare and advise you to double check it in case it changes at a later log on. In our case it is safe to type `yes` .
 
 ~~~
-$ wc -l *.pdb
+sshuser@127.0.0.1's password: ********
 ~~~
 {: .language-bash}
 
+Now you are prompted for a password. In an example of terribly bad practice our password is the same as our username `sshuser` .
+
 ~~~
-  20  cubane.pdb
-  12  ethane.pdb
-   9  methane.pdb
-  30  octane.pdb
-  21  pentane.pdb
-  15  propane.pdb
- 107  total
+    sshuser@7a7882cd4d46:~$
 ~~~
-{: .output}
+{: .language-bash}
 
-> ## Why Isn't It Doing Anything?
->
-> What happens if a command is supposed to process a file, but we
-> don't give it a filename? For example, what if we type:
->
-> ~~~
-> $ wc -l
-> ~~~
-> {: .language-bash}
->
-> but don't type `*.pdb` (or anything else) after the command?
-> Since it doesn't have any filenames, `wc` assumes it is supposed to
-> process input given at the command prompt, so it just sits there and waits for us to give
-> it some data interactively. From the outside, though, all we see is it
-> sitting there: the command doesn't appear to do anything.
->
-> If you make this kind of mistake, you can escape out of this state by holding down
-> the control key (<kbd>Ctrl</kbd>) and typing the letter <kbd>C</kbd> once and letting go of the <kbd>Ctrl</kbd> key.
-> <kbd>Ctrl</kbd>+<kbd>C</kbd>
-{: .callout}
+You should now have a prompt very similar to the one you started with but with a new username and computer hostname. Take a look around with the `ls` command and you should see that your new session has its own completely independent filesystem. Unfortunately it's rather empty. Let's change that, but first we need to go back to our original computer's shell. User `Ctrl+D` on an empty command prompt to log out.
 
-We can also use `-w` to get only the number of words,
-or `-c` to get only the number of characters.
+~~~
+$ ls -la /home
+~~~
+{: .language-bash}
 
-Which of these files contains the fewest lines?
-It's an easy question to answer when there are only six files,
-but what if there were 6000?
-Our first step toward a solution is to run the command:
+## Moving files
+
+`ssh` has a simple file copying counterpart called `scp` which uses all the same methods for authentication and encryption but focuses on moving files between computers in a similar manner to the `cp` command we learnt about before.
 
 ~~~
 $ wc -l *.pdb > lengths.txt
