@@ -3,24 +3,17 @@ title: "Using remote resources"
 teaching: 45
 exercises: 30
 questions:
-- "How can I combine existing commands to do new things?"
-objectives:
-- "Redirect a command's output to a file."
-- "Process a file instead of keyboard input using redirection."
-- "Construct command pipelines with two or more stages."
-- "Explain what usually happens if a program or pipeline isn't given any input to process."
-- "Explain Unix's 'small pieces, loosely joined' philosophy."
+- "How can I work on the unix shell of a remote computer:
+- "How can I move files between computers"
+- "How can I access web resources using the command line"
+- "Mounting a directory from another computer onto your local filesystem"
+- "When might different remote access tools be more appropriate for a task"
 keypoints:
-- "`cat` displays the contents of its inputs."
-- "`head` displays the first 10 lines of its input."
-- "`tail` displays the last 10 lines of its input."
-- "`sort` sorts its inputs."
-- "`wc` counts lines, words, and characters in its inputs."
-- "`command > file` redirects a command's output to a file (overwriting any existing content)."
-- "`command >> file` appends a command's output to a file."
-- "`<` operator redirects input to a command"
-- "`first | second` is a pipeline: the output of the first command is used as the input to the second."
-- "The best way to use the shell is to use pipes to combine simple single-purpose programs (filters)."
+- "`ssh` a secure method of running a bash terminal on a remote computer on which you have a user"
+- "`scp` a method of copying files using the ssh protocol"
+- "`sshfs` a method of using the ssh protocol to connect your local filesystem directly to a remote filesystem as if they were connnected"
+- "`rsync` a different method of file transfer which only copies files that have changed"
+- "`wget` a command which can download files from http links as if it were in a browser"
 ---
 
 Now that we know a few basic commands,
