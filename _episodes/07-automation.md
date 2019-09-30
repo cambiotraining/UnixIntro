@@ -1,615 +1,605 @@
 ---
-title: "Automating work in bash"
-teaching: 45
-exercises: 30
+title: "Shell Scripts"
+teaching: 30
+exercises: 15
 questions:
-- "How can I combine existing commands to do new things?"
+- "How can I save and re-use commands?"
 objectives:
-- "Redirect a command's output to a file."
-- "Process a file instead of keyboard input using redirection."
-- "Construct command pipelines with two or more stages."
-- "Explain what usually happens if a program or pipeline isn't given any input to process."
-- "Explain Unix's 'small pieces, loosely joined' philosophy."
+- "Write a shell script that runs a command or series of commands for a fixed set of files."
+- "Run a shell script from the command line."
+- "Write a shell script that operates on a set of files defined by the user on the command line."
+- "Create pipelines that include shell scripts you, and others, have written."
 keypoints:
-- "`cat` displays the contents of its inputs."
-- "`head` displays the first 10 lines of its input."
-- "`tail` displays the last 10 lines of its input."
-- "`sort` sorts its inputs."
-- "`wc` counts lines, words, and characters in its inputs."
-- "`command > file` redirects a command's output to a file (overwriting any existing content)."
-- "`command >> file` appends a command's output to a file."
-- "`<` operator redirects input to a command"
-- "`first | second` is a pipeline: the output of the first command is used as the input to the second."
-- "The best way to use the shell is to use pipes to combine simple single-purpose programs (filters)."
+- "Save commands in files (usually called shell scripts) for re-use."
+- "`bash filename` runs the commands saved in a file."
+- "`$@` refers to all of a shell script's command-line arguments."
+- "`$1`, `$2`, etc., refer to the first command-line argument, the second command-line argument, etc."
+- "Place variables in quotes if the values might have spaces in them."
+- "Letting users decide what files to process is more flexible and more consistent with built-in Unix commands."
 ---
 
-Now that we know a few basic commands,
-we can finally look at the shell's most powerful feature:
-the ease with which it lets us combine existing programs in new ways.
-We'll start with a directory called `molecules`
-that contains six files describing some simple organic molecules.
-The `.pdb` extension indicates that these files are in Protein Data Bank format,
-a simple text format that specifies the type and position of each atom in the molecule.
+We are finally ready to see what makes the shell such a powerful programming environment.
+We are going to take the commands we repeat frequently and save them in files
+so that we can re-run all those operations again later by typing a single command.
+For historical reasons,
+a bunch of commands saved in a file is usually called a **shell script**,
+but make no mistake:
+these are actually small programs.
 
-~~~
-$ ls molecules
-~~~
-{: .language-bash}
-
-~~~
-cubane.pdb    ethane.pdb    methane.pdb
-octane.pdb    pentane.pdb   propane.pdb
-~~~
-{: .output}
-
-Let's go into that directory with `cd` and run the command `wc *.pdb`.
-`wc` is the "word count" command:
-it counts the number of lines, words, and characters in files (from left to right, in that order).
-
-The `*` in `*.pdb` matches zero or more characters,
-so the shell turns `*.pdb` into a list of all `.pdb` files in the current directory:
+Let's start by going back to `molecules/` and creating a new file, `middle.sh` which will
+become our shell script:
 
 ~~~
 $ cd molecules
-$ wc *.pdb
+$ nano middle.sh
+~~~
+{: .language-bash}
+
+The command `nano middle.sh` opens the file `middle.sh` within the text editor 'nano'
+(which runs within the shell).
+If the file does not exist, it will be created.
+We can use the text editor to directly edit the file -- we'll simply insert the following line:
+
+~~~
+head -n 15 octane.pdb | tail -n 5
+~~~
+{: .source}
+
+This is a variation on the pipe we constructed earlier:
+it selects lines 11-15 of the file `octane.pdb`.
+Remember, we are *not* running it as a command just yet:
+we are putting the commands in a file.
+
+Then we save the file (`Ctrl-O` in nano),
+ and exit the text editor (`Ctrl-X` in nano).
+Check that the directory `molecules` now contains a file called `middle.sh`.
+
+Once we have saved the file,
+we can ask the shell to execute the commands it contains.
+Our shell is called `bash`, so we run the following command:
+
+~~~
+$ bash middle.sh
 ~~~
 {: .language-bash}
 
 ~~~
-  20  156  1158  cubane.pdb
-  12  84   622   ethane.pdb
-   9  57   422   methane.pdb
-  30  246  1828  octane.pdb
-  21  165  1226  pentane.pdb
-  15  111  825   propane.pdb
- 107  819  6081  total
+ATOM      9  H           1      -4.502   0.681   0.785  1.00  0.00
+ATOM     10  H           1      -5.254  -0.243  -0.537  1.00  0.00
+ATOM     11  H           1      -4.357   1.252  -0.895  1.00  0.00
+ATOM     12  H           1      -3.009  -0.741  -1.467  1.00  0.00
+ATOM     13  H           1      -3.172  -1.337   0.206  1.00  0.00
 ~~~
 {: .output}
 
+Sure enough,
+our script's output is exactly what we would get if we ran that pipeline directly.
 
-
-If we run `wc -l` instead of just `wc`,
-the output shows only the number of lines per file:
-
-~~~
-$ wc -l *.pdb
-~~~
-{: .language-bash}
-
-~~~
-  20  cubane.pdb
-  12  ethane.pdb
-   9  methane.pdb
-  30  octane.pdb
-  21  pentane.pdb
-  15  propane.pdb
- 107  total
-~~~
-{: .output}
-
-> ## Why Isn't It Doing Anything?
+> ## Text vs. Whatever
 >
-> What happens if a command is supposed to process a file, but we
-> don't give it a filename? For example, what if we type:
->
-> ~~~
-> $ wc -l
-> ~~~
-> {: .language-bash}
->
-> but don't type `*.pdb` (or anything else) after the command?
-> Since it doesn't have any filenames, `wc` assumes it is supposed to
-> process input given at the command prompt, so it just sits there and waits for us to give
-> it some data interactively. From the outside, though, all we see is it
-> sitting there: the command doesn't appear to do anything.
->
-> If you make this kind of mistake, you can escape out of this state by holding down
-> the control key (<kbd>Ctrl</kbd>) and typing the letter <kbd>C</kbd> once and letting go of the <kbd>Ctrl</kbd> key.
-> <kbd>Ctrl</kbd>+<kbd>C</kbd>
+> We usually call programs like Microsoft Word or LibreOffice Writer "text
+> editors", but we need to be a bit more careful when it comes to
+> programming. By default, Microsoft Word uses `.docx` files to store not
+> only text, but also formatting information about fonts, headings, and so
+> on. This extra information isn't stored as characters, and doesn't mean
+> anything to tools like `head`: they expect input files to contain
+> nothing but the letters, digits, and punctuation on a standard computer
+> keyboard. When editing programs, therefore, you must either use a plain
+> text editor, or be careful to save files as plain text.
 {: .callout}
 
-We can also use `-w` to get only the number of words,
-or `-c` to get only the number of characters.
-
-Which of these files contains the fewest lines?
-It's an easy question to answer when there are only six files,
-but what if there were 6000?
-Our first step toward a solution is to run the command:
+What if we want to select lines from an arbitrary file?
+We could edit `middle.sh` each time to change the filename,
+but that would probably take longer than typing the command out again
+in the shell and executing it with a new file name.
+Instead, let's edit `middle.sh` and make it more versatile:
 
 ~~~
-$ wc -l *.pdb > lengths.txt
+$ nano middle.sh
 ~~~
 {: .language-bash}
 
-The greater than symbol, `>`, tells the shell to **redirect** the command's output
-to a file instead of printing it to the screen. (This is why there is no screen output:
-everything that `wc` would have printed has gone into the
-file `lengths.txt` instead.)  The shell will create
-the file if it doesn't exist. If the file exists, it will be
-silently overwritten, which may lead to data loss and thus requires
-some caution.
-`ls lengths.txt` confirms that the file exists:
+Now, within "nano", replace the text `octane.pdb` with the special variable called `$1`:
 
 ~~~
-$ ls lengths.txt
-~~~
-{: .language-bash}
-
-~~~
-lengths.txt
+head -n 15 "$1" | tail -n 5
 ~~~
 {: .output}
 
-We can now send the content of `lengths.txt` to the screen using `cat lengths.txt`.
-The `cat` command gets its name from "concatenate" i.e. join together,
-and it prints the contents of files one after another.
-There's only one file in this case,
-so `cat` just shows us what it contains:
+Inside a shell script,
+`$1` means 'the first filename (or other argument) on the command line'.
+We can now run our script like this:
 
 ~~~
-$ cat lengths.txt
+$ bash middle.sh octane.pdb
 ~~~
 {: .language-bash}
 
 ~~~
-  20  cubane.pdb
-  12  ethane.pdb
-   9  methane.pdb
-  30  octane.pdb
-  21  pentane.pdb
-  15  propane.pdb
- 107  total
+ATOM      9  H           1      -4.502   0.681   0.785  1.00  0.00
+ATOM     10  H           1      -5.254  -0.243  -0.537  1.00  0.00
+ATOM     11  H           1      -4.357   1.252  -0.895  1.00  0.00
+ATOM     12  H           1      -3.009  -0.741  -1.467  1.00  0.00
+ATOM     13  H           1      -3.172  -1.337   0.206  1.00  0.00
 ~~~
 {: .output}
 
-> ## Output Page by Page
+or on a different file like this:
+
+~~~
+$ bash middle.sh pentane.pdb
+~~~
+{: .language-bash}
+
+~~~
+ATOM      9  H           1       1.324   0.350  -1.332  1.00  0.00
+ATOM     10  H           1       1.271   1.378   0.122  1.00  0.00
+ATOM     11  H           1      -0.074  -0.384   1.288  1.00  0.00
+ATOM     12  H           1      -0.048  -1.362  -0.205  1.00  0.00
+ATOM     13  H           1      -1.183   0.500  -1.412  1.00  0.00
+~~~
+{: .output}
+
+> ## Double-Quotes Around Arguments
 >
-> We'll continue to use `cat` in this lesson, for convenience and consistency,
-> but it has the disadvantage that it always dumps the whole file onto your screen.
-> More useful in practice is the command `less`,
-> which you use with `less lengths.txt`.
-> This displays a screenful of the file, and then stops.
-> You can go forward one screenful by pressing the spacebar,
-> or back one by pressing `b`.  Press `q` to quit.
+> For the same reason that we put the loop variable inside double-quotes,
+> in case the filename happens to contain any spaces,
+> we surround `$1` with double-quotes.
 {: .callout}
 
-Now let's use the `sort` command to sort its contents.
-
-> ## What Does `sort -n` Do?
->
-> If we run `sort` on a file containing the following lines:
->
-> ~~~
-> 10
-> 2
-> 19
-> 22
-> 6
-> ~~~
-> {: .source}
->
-> the output is:
->
-> ~~~
-> 10
-> 19
-> 2
-> 22
-> 6
-> ~~~
-> {: .output}
->
-> If we run `sort -n` on the same input, we get this instead:
->
-> ~~~
-> 2
-> 6
-> 10
-> 19
-> 22
-> ~~~
-> {: .output}
->
-> Explain why `-n` has this effect.
->
-> > ## Solution
-> > The `-n` option specifies a numerical rather than an alphanumerical sort.
-> {: .solution}
-{: .challenge}
-
-We will also use the `-n` option to specify that the sort is
-numerical instead of alphanumerical.
-This does *not* change the file;
-instead, it sends the sorted result to the screen:
+We still need to edit `middle.sh` each time we want to adjust the range of lines,
+though.
+Let's fix that by using the special variables `$2` and `$3` for the
+number of lines to be passed to `head` and `tail` respectively:
 
 ~~~
-$ sort -n lengths.txt
+$ nano middle.sh
 ~~~
 {: .language-bash}
 
 ~~~
-  9  methane.pdb
- 12  ethane.pdb
- 15  propane.pdb
- 20  cubane.pdb
- 21  pentane.pdb
- 30  octane.pdb
-107  total
+head -n "$2" "$1" | tail -n "$3"
 ~~~
 {: .output}
 
-We can put the sorted list of lines in another temporary file called `sorted-lengths.txt`
-by putting `> sorted-lengths.txt` after the command,
-just as we used `> lengths.txt` to put the output of `wc` into `lengths.txt`.
-Once we've done that,
-we can run another command called `head` to get the first few lines in `sorted-lengths.txt`:
+We can now run:
 
 ~~~
-$ sort -n lengths.txt > sorted-lengths.txt
-$ head -n 1 sorted-lengths.txt
+$ bash middle.sh pentane.pdb 15 5
 ~~~
 {: .language-bash}
 
 ~~~
-  9  methane.pdb
+ATOM      9  H           1       1.324   0.350  -1.332  1.00  0.00
+ATOM     10  H           1       1.271   1.378   0.122  1.00  0.00
+ATOM     11  H           1      -0.074  -0.384   1.288  1.00  0.00
+ATOM     12  H           1      -0.048  -1.362  -0.205  1.00  0.00
+ATOM     13  H           1      -1.183   0.500  -1.412  1.00  0.00
 ~~~
 {: .output}
 
-Using `-n 1` with `head` tells it that
-we only want the first line of the file;
-`-n 20` would get the first 20,
-and so on.
-Since `sorted-lengths.txt` contains the lengths of our files ordered from least to greatest,
-the output of `head` must be the file with the fewest lines.
-
-> ## Redirecting to the same file
->
-> It's a very bad idea to try redirecting
-> the output of a command that operates on a file
-> to the same file. For example:
->
-> ~~~
-> $ sort -n lengths.txt > lengths.txt
-> ~~~
-> {: .language-bash}
->
-> Doing something like this may give you
-> incorrect results and/or delete
-> the contents of `lengths.txt`.
-{: .callout}
-
-> ## What Does `>>` Mean?
->
-> We have seen the use of `>`, but there is a similar operator `>>` which works slightly differently.
-> We'll learn about the differences between these two operators by printing some strings.
-> We can use the `echo` command to print strings e.g.
->
-> ~~~
-> $ echo The echo command prints text
-> ~~~
-> {: .language-bash}
-> ~~~
-> The echo command prints text
-> ~~~
-> {: .output}
->
-> Now test the commands below to reveal the difference between the two operators:
->
-> ~~~
-> $ echo hello > testfile01.txt
-> ~~~
-> {: .language-bash}
->
-> and:
->
-> ~~~
-> $ echo hello >> testfile02.txt
-> ~~~
-> {: .language-bash}
->
-> Hint: Try executing each command twice in a row and then examining the output files.
->
-> > ## Solution
-> > In the first example with `>`, the string "hello" is written to `testfile01.txt`,
-> > but the file gets overwritten each time we run the command.
-> >
-> > We see from the second example that the `>>` operator also writes "hello" to a file
-> > (in this case`testfile02.txt`),
-> > but appends the string to the file if it already exists (i.e. when we run it for the second time).
-> {: .solution}
-{: .challenge}
-
-> ## Appending Data
->
-> We have already met the `head` command, which prints lines from the start of a file.
-> `tail` is similar, but prints lines from the end of a file instead.
->
-> Consider the file `data-shell/data/animals.txt`.
-> After these commands, select the answer that
-> corresponds to the file `animals-subset.txt`:
->
-> ~~~
-> $ head -n 3 animals.txt > animals-subset.txt
-> $ tail -n 2 animals.txt >> animals-subset.txt
-> ~~~
-> {: .language-bash}
->
-> 1. The first three lines of `animals.txt`
-> 2. The last two lines of `animals.txt`
-> 3. The first three lines and the last two lines of `animals.txt`
-> 4. The second and third lines of `animals.txt`
->
-> > ## Solution
-> > Option 3 is correct.
-> > For option 1 to be correct we would only run the `head` command.
-> > For option 2 to be correct we would only run the `tail` command.
-> > For option 4 to be correct we would have to pipe the output of `head` into `tail -n 2` by doing `head -n 3 animals.txt | tail -n 2 > animals-subset.txt`
-> {: .solution}
-{: .challenge}
-
-If you think this is confusing,
-you're in good company:
-even once you understand what `wc`, `sort`, and `head` do,
-all those intermediate files make it hard to follow what's going on.
-We can make it easier to understand by running `sort` and `head` together:
+By changing the arguments to our command we can change our script's
+behaviour:
 
 ~~~
-$ sort -n lengths.txt | head -n 1
+$ bash middle.sh pentane.pdb 20 5
 ~~~
 {: .language-bash}
 
 ~~~
-  9  methane.pdb
+ATOM     14  H           1      -1.259   1.420   0.112  1.00  0.00
+ATOM     15  H           1      -2.608  -0.407   1.130  1.00  0.00
+ATOM     16  H           1      -2.540  -1.303  -0.404  1.00  0.00
+ATOM     17  H           1      -3.393   0.254  -0.321  1.00  0.00
+TER      18              1
 ~~~
 {: .output}
 
-The vertical bar, `|`, between the two commands is called a **pipe**.
-It tells the shell that we want to use
-the output of the command on the left
-as the input to the command on the right.
+This works,
+but it may take the next person who reads `middle.sh` a moment to figure out what it does.
+We can improve our script by adding some **comments** at the top:
 
-Nothing prevents us from chaining pipes consecutively.
-That is, we can for example send the output of `wc` directly to `sort`,
-and then the resulting output to `head`.
-Thus we first use a pipe to send the output of `wc` to `sort`:
+~~~
+$ nano middle.sh
+~~~
+{: .language-bash}
+
+~~~
+# Select lines from the middle of a file.
+# Usage: bash middle.sh filename end_line num_lines
+head -n "$2" "$1" | tail -n "$3"
+~~~
+{: .output}
+
+A comment starts with a `#` character and runs to the end of the line.
+The computer ignores comments,
+but they're invaluable for helping people (including your future self) understand and use scripts.
+The only caveat is that each time you modify the script,
+you should check that the comment is still accurate:
+an explanation that sends the reader in the wrong direction is worse than none at all.
+
+What if we want to process many files in a single pipeline?
+For example, if we want to sort our `.pdb` files by length, we would type:
 
 ~~~
 $ wc -l *.pdb | sort -n
 ~~~
 {: .language-bash}
 
-~~~
-   9 methane.pdb
-  12 ethane.pdb
-  15 propane.pdb
-  20 cubane.pdb
-  21 pentane.pdb
-  30 octane.pdb
- 107 total
-~~~
-{: .output}
+because `wc -l` lists the number of lines in the files
+(recall that `wc` stands for 'word count', adding the `-l` option means 'count lines' instead)
+and `sort -n` sorts things numerically.
+We could put this in a file,
+but then it would only ever sort a list of `.pdb` files in the current directory.
+If we want to be able to get a sorted list of other kinds of files,
+we need a way to get all those names into the script.
+We can't use `$1`, `$2`, and so on
+because we don't know how many files there are.
+Instead, we use the special variable `$@`,
+which means,
+'All of the command-line arguments to the shell script'.
+We also should put `$@` inside double-quotes
+to handle the case of arguments containing spaces
+(`"$@"` is equivalent to `"$1"` `"$2"` ...)
+Here's an example:
 
-And now we send the output of this pipe, through another pipe, to `head`, so that the full pipeline becomes:
-
 ~~~
-$ wc -l *.pdb | sort -n | head -n 1
+$ nano sorted.sh
 ~~~
 {: .language-bash}
 
 ~~~
-   9  methane.pdb
+# Sort files by their length.
+# Usage: bash sorted.sh one_or_more_filenames
+wc -l "$@" | sort -n
 ~~~
 {: .output}
 
-This is exactly like a mathematician nesting functions like *log(3x)*
-and saying "the log of three times *x*".
-In our case,
-the calculation is "head of sort of line count of `*.pdb`".
+~~~
+$ bash sorted.sh *.pdb ../creatures/*.dat
+~~~
+{: .language-bash}
 
+~~~
+9 methane.pdb
+12 ethane.pdb
+15 propane.pdb
+20 cubane.pdb
+21 pentane.pdb
+30 octane.pdb
+163 ../creatures/basilisk.dat
+163 ../creatures/minotaur.dat
+163 ../creatures/unicorn.dat
+596 total
+~~~
+{: .output}
 
-The redirection and pipes used in the last few commands are illustrated below:
-
-![Redirects and Pipes](../fig/redirects-and-pipes.png)
-
-> ## Piping Commands Together
+> ## List Unique Species
 >
-> In our current directory, we want to find the 3 files which have the least number of
-> lines. Which command listed below would work?
->
-> 1. `wc -l * > sort -n > head -n 3`
-> 2. `wc -l * | sort -n | head -n 1-3`
-> 3. `wc -l * | head -n 3 | sort -n`
-> 4. `wc -l * | sort -n | head -n 3`
->
-> > ## Solution
-> > Option 4 is the solution.
-> > The pipe character `|` is used to connect the output from one command to
-> > the input of another.
-> > `>` is used to redirect standard output to a file.
-> > Try it in the `data-shell/molecules` directory!
-> {: .solution}
-{: .challenge}
-
-> ## An example pipeline: Checking Files
->
-> There are 17 files from an assay in the `~/Desktop/data-shell/north-pacific-gyre/2012-07-03` directory 
-> Suppose you want to do some quick sanity checks on the content of the files. You know that files > are supposed to have 300 lines.
->
-> Starting by moving to that directory,
->
-> 1. How would you check if there are any files with fewer than 300 lines in the directory?
-> 2. How would you check if there are any files with more than 300 lines in the directory?
->
->
-> > ## Solution
-> > 1. `wc -l *.txt | sort -n | head -n 5`. You can report the number of lines of all the
-> > text files in the directory, sort them, and then get the top (if any files have fewer than 
-> > 300 lines they will appear here).
-> > 2. `wc -l *.txt | sort -n -r | head -n 5`. Same as above but now we want to sort the
-> > files in reverse order.
-> {: .solution}
-{: .challenge}
-
-This idea of linking programs together is why Unix has been so successful.
-Instead of creating enormous programs that try to do many different things,
-Unix programmers focus on creating lots of simple tools that each do one job well,
-and that work well with each other.
-This programming model is called "pipes and filters".
-We've already seen pipes;
-a **filter** is a program like `wc` or `sort`
-that transforms a stream of input into a stream of output.
-Almost all of the standard Unix tools can work this way:
-unless told to do otherwise,
-they read from standard input,
-do something with what they've read,
-and write to standard output.
-
-The key is that any program that reads lines of text from standard input
-and writes lines of text to standard output
-can be combined with every other program that behaves this way as well.
-You can *and should* write your programs this way
-so that you and other people can put those programs into pipes to multiply their power.
-
-
-> ## Pipe Reading Comprehension
->
-> A file called `animals.txt` (in the `data-shell/data` folder) contains the following data:
+> Leah has several hundred data files, each of which is formatted like this:
 >
 > ~~~
-> 2012-11-05,deer
-> 2012-11-05,rabbit
-> 2012-11-05,raccoon
-> 2012-11-06,rabbit
-> 2012-11-06,deer
-> 2012-11-06,fox
-> 2012-11-07,rabbit
-> 2012-11-07,bear
+> 2013-11-05,deer,5
+> 2013-11-05,rabbit,22
+> 2013-11-05,raccoon,7
+> 2013-11-06,rabbit,19
+> 2013-11-06,deer,2
+> 2013-11-06,fox,1
+> 2013-11-07,rabbit,18
+> 2013-11-07,bear,1
 > ~~~
 > {: .source}
 >
-> What text passes through each of the pipes and the final redirect in the pipeline below?
+> An example of this type of file is given in `data-shell/data/animal-counts/animals.txt`.
 >
-> ~~~
-> $ cat animals.txt | head -n 5 | tail -n 3 | sort -r > final.txt
-> ~~~
-> {: .language-bash}
-> Hint: build the pipeline up one command at a time to test your understanding
+> We can use the command `cut -d , -f 2 animals.txt | sort | uniq` to produce the unique species in `animals.txt`. In order to avoid having to type out this series of commands every time, a scientist may choose to write a shell script instead.
+>
+> Write a shell script called `species.sh` that takes any number of
+> filenames as command-line arguments, and uses a variation of the above command to print a list of the unique species appearing in each of those files separately.
+>
 > > ## Solution
-> > The `head` command extracts the first 5 lines from `animals.txt`.
-> > Then, the last 3 lines are extracted from the previous 5 by using the `tail` command.
-> > With the `sort -r` command those 3 lines are sorted in reverse order and finally,
-> > the output is redirected to a file `final.txt`.
-> > The content of this file can be checked by executing `cat final.txt`.
-> > The file should contain the following lines:
+> >
 > > ```
-> > 2012-11-06,rabbit
-> > 2012-11-06,deer
-> > 2012-11-05,raccoon
+> > # Script to find unique species in csv files where species is the second data field
+> > # This script accepts any number of file names as command line arguments
+> >
+> > # Loop over all files
+> > for file in $@
+> > do
+> > 	echo "Unique species in $file:"
+> > 	# Extract species names
+> > 	cut -d , -f 2 $file | sort | uniq
+> > done
 > > ```
 > > {: .source}
 > {: .solution}
 {: .challenge}
 
-> ## Pipe Construction
+
+Suppose we have just run a series of commands that did something useful --- for example,
+that created a graph we'd like to use in a paper.
+We'd like to be able to re-create the graph later if we need to,
+so we want to save the commands in a file.
+Instead of typing them in again
+(and potentially getting them wrong)
+we can do this:
+
+~~~
+$ history | tail -n 5 > redo-figure-3.sh
+~~~
+{: .language-bash}
+
+The file `redo-figure-3.sh` now contains:
+
+~~~
+297 bash goostats NENE01729B.txt stats-NENE01729B.txt
+298 bash goodiff stats-NENE01729B.txt /data/validated/01729.txt > 01729-differences.txt
+299 cut -d ',' -f 2-3 01729-differences.txt > 01729-time-series.txt
+300 ygraph --format scatter --color bw --borders none 01729-time-series.txt figure-3.png
+301 history | tail -n 5 > redo-figure-3.sh
+~~~
+{: .source}
+
+After a moment's work in an editor to remove the serial numbers on the commands,
+and to remove the final line where we called the `history` command,
+we have a completely accurate record of how we created that figure.
+
+> ## Why Record Commands in the History Before Running Them?
 >
-> For the file `animals.txt` from the previous exercise, consider the following command:
+> If you run the command:
 >
 > ~~~
-> $ cut -d , -f 2 animals.txt
+> $ history | tail -n 5 > recent.sh
 > ~~~
 > {: .language-bash}
 >
-> The `cut` command is used to remove or "cut out" certain sections of each line in the file. The optional `-d` flag is used to define the delimiter. A **delimiter** is a character that is used to separate each line of text into columns. The default delimiter is <kbd>Tab</kbd>, meaning that the `cut` command will automatically assume that values in different columns will be separated by a tab. The `-f` flag is used to specify the field (column) to cut out.
-> The command above uses the `-d` option to split each line by comma, and the `-f` option
-> to print the second field in each line, to give the following output:
->
-> ~~~
-> deer
-> rabbit
-> raccoon
-> rabbit
-> deer
-> fox
-> rabbit
-> bear
-> ~~~
-> {: .output}
->
-> The `uniq` command filters out adjacent matching lines in a file.
-> How could you extend this pipeline (using `uniq` and another command) to find
-> out what animals the file contains (without any duplicates in their
-> names)?
+> the last command in the file is the `history` command itself, i.e.,
+> the shell has added `history` to the command log before actually
+> running it. In fact, the shell *always* adds commands to the log
+> before running them. Why do you think it does this?
 >
 > > ## Solution
+> > If a command causes something to crash or hang, it might be useful
+> > to know what that command was, in order to investigate the problem.
+> > Were the command only be recorded after running it, we would not
+> > have a record of the last command run in the event of a crash.
+> {: .solution}
+{: .challenge}
+
+In practice, most people develop shell scripts by running commands at the shell prompt a few times
+to make sure they're doing the right thing,
+then saving them in a file for re-use.
+This style of work allows people to recycle
+what they discover about their data and their workflow with one call to `history`
+and a bit of editing to clean up the output
+and save it as a shell script.
+
+## Nelle's Pipeline: Creating a Script
+
+
+Nelle's supervisor insisted that all her analytics must be reproducible. The easiest way to capture all the steps is in a script.
+
+First we return to Nelle's data directory:
+```
+$ cd ../north-pacific-gyre/2012-07-03/
+```
+{: .language-bash}
+
+She runs the editor and writes the following:
+
+~~~
+# Calculate stats for data files.
+for datafile in "$@"
+do
+    echo $datafile
+    bash goostats $datafile stats-$datafile
+done
+~~~
+{: .language-bash}
+
+She saves this in a file called `do-stats.sh`
+so that she can now re-do the first stage of her analysis by typing:
+
+~~~
+$ bash do-stats.sh NENE*[AB].txt
+~~~
+{: .language-bash}
+
+She can also do this:
+
+~~~
+$ bash do-stats.sh NENE*[AB].txt | wc -l
+~~~
+{: .language-bash}
+
+so that the output is just the number of files processed
+rather than the names of the files that were processed.
+
+One thing to note about Nelle's script is that
+it lets the person running it decide what files to process.
+She could have written it as:
+
+~~~
+# Calculate stats for Site A and Site B data files.
+for datafile in NENE*[AB].txt
+do
+    echo $datafile
+    bash goostats $datafile stats-$datafile
+done
+~~~
+{: .language-bash}
+
+The advantage is that this always selects the right files:
+she doesn't have to remember to exclude the 'Z' files.
+The disadvantage is that it *always* selects just those files --- she can't run it on all files
+(including the 'Z' files),
+or on the 'G' or 'H' files her colleagues in Antarctica are producing,
+without editing the script.
+If she wanted to be more adventurous,
+she could modify her script to check for command-line arguments,
+and use `NENE*[AB].txt` if none were provided.
+Of course, this introduces another tradeoff between flexibility and complexity.
+
+> ## Variables in Shell Scripts
+>
+> In the `molecules` directory, imagine you have a shell script called `script.sh` containing the
+> following commands:
+>
+> ~~~
+> head -n $2 $1
+> tail -n $3 $1
+> ~~~
+> {: .language-bash}
+>
+> While you are in the `molecules` directory, you type the following command:
+>
+> ~~~
+> bash script.sh '*.pdb' 1 1
+> ~~~
+> {: .language-bash}
+>
+> Which of the following outputs would you expect to see?
+>
+> 1. All of the lines between the first and the last lines of each file ending in `.pdb`
+>    in the `molecules` directory
+> 2. The first and the last line of each file ending in `.pdb` in the `molecules` directory
+> 3. The first and the last line of each file in the `molecules` directory
+> 4. An error because of the quotes around `*.pdb`
+>
+> > ## Solution
+> > The correct answer is 2.
+> >
+> > The special variables $1, $2 and $3 represent the command line arguments given to the
+> > script, such that the commands run are:
+> >
 > > ```
-> > $ cut -d , -f 2 animals.txt | sort | uniq
+> > $ head -n 1 cubane.pdb ethane.pdb octane.pdb pentane.pdb propane.pdb
+> > $ tail -n 1 cubane.pdb ethane.pdb octane.pdb pentane.pdb propane.pdb
 > > ```
 > > {: .language-bash}
+> > The shell does not expand `'*.pdb'` because it is enclosed by quote marks.
+> > As such, the first argument to the script is `'*.pdb'` which gets expanded within the
+> > script by `head` and `tail`.
 > {: .solution}
 {: .challenge}
 
-> ## Awk: a more powerful tool for text processing
+> ## Find the Longest File With a Given Extension
 >
-> We have seen the `cut` command that allows the selection of columns in tabular data.
-> If you need more powerful manipulation of tabular data you can use the command `awk`, which
-> permits more powerful operations (selection, calculations etc.) on columns. For more complex
-> operations, however, we recommend going to your favourite programming language!
-{: .callout}
-
-> ## Which Pipe?
->
-> The file `animals.txt` contains 8 lines of data formatted as follows:
+> Write a shell script called `longest.sh` that takes the name of a
+> directory and a filename extension as its arguments, and prints
+> out the name of the file with the most lines in that directory
+> with that extension. For example:
 >
 > ~~~
-> 2012-11-05,deer
-> 2012-11-05,rabbit
-> 2012-11-05,raccoon
-> 2012-11-06,rabbit
-> ...
+> $ bash longest.sh /tmp/data pdb
 > ~~~
-> {: .output}
->
-> The `uniq` command has a `-c` option which gives a count of the
-> number of times a line occurs in its input.  Assuming your current
-> directory is `data-shell/data/`, what command would you use to produce
-> a table that shows the total count of each type of animal in the file?
->
-> 1.  `sort animals.txt | uniq -c`
-> 2.  `sort -t, -k2,2 animals.txt | uniq -c`
-> 3.  `cut -d, -f 2 animals.txt | uniq -c`
-> 4.  `cut -d, -f 2 animals.txt | sort | uniq -c`
-> 5.  `cut -d, -f 2 animals.txt | sort | uniq -c | wc -l`
->
-> > ## Solution
-> > Option 4. is the correct answer.
-> > If you have difficulty understanding why, try running the commands, or sub-sections of
-> > the pipelines (make sure you are in the `data-shell/data` directory).
-> {: .solution}
-{: .challenge}
-
-> ## Filtering by patterns
-> `grep` is another command that searches for patterns in text. Patterns could be simple 
-> text or a combination of text and the wildcard characters we have seen before like ? and *. Like > other commands we have seen `grep` can be used on multiple files. 
-> For example if we wanted to find all occurences of name in all the text files we could write:
->
-> ```
-> $ grep "name" *.txt
-> ```
 > {: .language-bash}
 >
->
-> Using the `animals.txt` file suppose we wanted to copy all the rabbit dates to a separate file `rabbit-dates.txt`. 
-> Which combination of commands would achieve this?
->
+> would print the name of the `.pdb` file in `/tmp/data` that has
+> the most lines.
 >
 > > ## Solution
-> > grep "rabbit" animals.txt | cut -d, -f 1 > rabbit-dates.txt
+> >
+> > ```
+> > # Shell script which takes two arguments:
+> > #    1. a directory name
+> > #    2. a file extension
+> > # and prints the name of the file in that directory
+> > # with the most lines which matches the file extension.
+> >
+> > wc -l $1/*.$2 | sort -n | tail -n 2 | head -n 1
+> > ```
+> > {: .source}
 > {: .solution}
 {: .challenge}
 
+> ## Script Reading Comprehension
+>
+> For this question, consider the `data-shell/molecules` directory once again.
+> This contains a number of `.pdb` files in addition to any other files you
+> may have created.
+> Explain what each of the following three scripts would do when run as
+> `bash script1.sh *.pdb`, `bash script2.sh *.pdb`, and `bash script3.sh *.pdb` respectively.
+>
+> ~~~
+> # Script 1
+> echo *.*
+> ~~~
+> {: .language-bash}
+>
+> ~~~
+> # Script 2
+> for filename in $1 $2 $3
+> do
+>     cat $filename
+> done
+> ~~~
+> {: .language-bash}
+>
+> ~~~
+> # Script 3
+> echo $@.pdb
+> ~~~
+> {: .language-bash}
+>
+> > ## Solutions
+> > In each case, the shell expands the wildcard in `*.pdb` before passing the resulting
+> > list of file names as arguments to the script.
+> >
+> > Script 1 would print out a list of all files containing a dot in their name.
+> > The arguments passed to the script are not actually used anywhere in the script.
+> >
+> > Script 2 would print the contents of the first 3 files with a `.pdb` file extension.
+> > `$1`, `$2`, and `$3` refer to the first, second, and third argument respectively.
+> >
+> > Script 3 would print all the arguments to the script (i.e. all the `.pdb` files),
+> > followed by `.pdb`.
+> > `$@` refers to *all* the arguments given to a shell script.
+> > ```
+> > cubane.pdb ethane.pdb methane.pdb octane.pdb pentane.pdb propane.pdb.pdb
+> > ```
+> > {: .output}
+> {: .solution}
+{: .challenge}
 
-
-
-
-
-
+> ## Debugging Scripts
+>
+> Suppose you have saved the following script in a file called `do-errors.sh`
+> in Nelle's `north-pacific-gyre/2012-07-03` directory:
+>
+> ~~~
+> # Calculate stats for data files.
+> for datafile in "$@"
+> do
+>     echo $datfile
+>     bash goostats $datafile stats-$datafile
+> done
+> ~~~
+> {: .language-bash}
+>
+> When you run it:
+>
+> ~~~
+> $ bash do-errors.sh NENE*[AB].txt
+> ~~~
+> {: .language-bash}
+>
+> the output is blank.
+> To figure out why, re-run the script using the `-x` option:
+>
+> ~~~
+> bash -x do-errors.sh NENE*[AB].txt
+> ~~~
+> {: .language-bash}
+>
+> What is the output showing you?
+> Which line is responsible for the error?
+>
+> > ## Solution
+> > The `-x` option causes `bash` to run in debug mode.
+> > This prints out each command as it is run, which will help you to locate errors.
+> > In this example, we can see that `echo` isn't printing anything. We have made a typo
+> > in the loop variable name, and the variable `datfile` doesn't exist, hence returning
+> > an empty string.
+> {: .solution}
+{: .challenge}
