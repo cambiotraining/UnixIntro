@@ -706,7 +706,7 @@ Run `pwd` and `ls -F` to ensure that we're in the directory we expect.
 > > ## Solution
 > > 1. No: `.` stands for the current directory.
 > > 2. No: `/` stands for the root directory.
-> > 3. No: Amanda's home directory is `/home/amanda`.
+> > 3. Yes: This is an example of using the full absolute path.
 > > 4. No: this goes up two levels, i.e. ends in `/home`.
 > > 5. Yes: `~` stands for the user's home directory, in this case `/home/amanda`.
 > > 6. No: this would navigate into a directory `home` in the current directory if it exists.
