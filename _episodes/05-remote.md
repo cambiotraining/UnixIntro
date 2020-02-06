@@ -132,7 +132,7 @@ Success!
 > {: .solution}
 {: .challenge}
 
-##Managing multiple remote files
+## Managing multiple remote files
 
 Sometimes we need to manage a large number of files across two locations, often maintaining a specific directory structure. `scp` can handle this with it's `-r` flag. Just like `cp` this puts the command in recursive mode allowing it to copy entire directories of files
 
