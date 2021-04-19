@@ -61,20 +61,20 @@ $ pwd
 {: .language-bash}
 
 ~~~
-/home/participant
+/home/ubuntu
 ~~~
 {: .output}
 
 Here,
-the computer's response is `/home/participant`,
+the computer's response is `/home/ubuntu`,
 which is your **home directory**:
 
 > ## Home Directory Variation
 >
 > The home directory path will look different on different operating systems.
-> On Mac it may look like `/Users/participant`,
-> and on Windows it will be similar to `C:\Documents and Settings\participant` or
-> `C:\Users\participant`.
+> On Mac it may look like `/Users/ubuntu`,
+> and on Windows it will be similar to `C:\Documents and Settings\ubuntu` or
+> `C:\Users\ubuntu`.
 > (Note that it may look slightly different for different versions of Windows.)
 > In future examples, we've used Linux output as the default - Mac and Windows
 > output may differ slightly, but should be generally similar.
@@ -94,7 +94,7 @@ On a typical Linux computer, the filesystem looks like this:
 At the top is the **root directory**
 that holds everything else.
 We refer to it using a slash character, `/`, on its own;
-this is the leading slash in `/home/participant`.
+this is the leading slash in `/home/ubuntu`.
 
 Inside that directory are several other directories:
 `bin` (which is where some built-in programs are stored),
@@ -103,7 +103,7 @@ Inside that directory are several other directories:
 `tmp` (for temporary files that don't need to be stored long-term),
 and so on.
 
-We know that our current working directory `/home/participant` is stored inside `/home`
+We know that our current working directory `/home/ubuntu` is stored inside `/home`
 because `/home` is the first part of its name.
 Similarly,
 we know that `/home` is stored inside the root directory `/`
@@ -119,14 +119,14 @@ because its name begins with `/`.
 
 Underneath `/home`,
 we find one directory for each user with an account on the machine,
-in this example *imhotep*, *larry*, and participant (you).
+in this example *imhotep*, *larry*, and ubuntu (you).
 
 ![Home Directories](../fig/home-directories.svg)
 
 The user *imhotep*'s files are stored in `/home/imhotep`,
 user *larry*'s in `/home/larry`,
-and yours in `/home/participant`.  Because you are the current user in our
-examples here, this is why we get `/home/participant` as our home directory.
+and yours in `/home/ubuntu`.  Because you are the current user in our
+examples here, this is why we get `/home/ubuntu` as our home directory.
 Typically, when you open a new command prompt you will be in
 your home directory to start.
 
@@ -488,9 +488,9 @@ $ cd data
 
 These commands will move us from our home directory onto our Desktop, then into
 the `data-shell` directory, then into the `data` directory.  You will notice that `cd` doesn't print anything.  This is normal.  Many shell commands will not output anything to the screen when successfully executed.  But if we run `pwd` after it, we can see that we are now
-in `/home/participant/Desktop/data-shell/data`.
+in `/home/ubuntu/Desktop/data-shell/data`.
 If we run `ls` without arguments now,
-it lists the contents of `/home/participant/Desktop/data-shell/data`,
+it lists the contents of `/home/ubuntu/Desktop/data-shell/data`,
 because that's where we now are:
 
 ~~~
@@ -499,7 +499,7 @@ $ pwd
 {: .language-bash}
 
 ~~~
-/home/participant/Desktop/data-shell/data
+/home/ubuntu/Desktop/data-shell/data
 ~~~
 {: .output}
 
@@ -547,7 +547,7 @@ $ cd ..
 or more succinctly,
 the **parent** of the current directory.
 Sure enough,
-if we run `pwd` after running `cd ..`, we're back in `/home/participant/Desktop/data-shell`:
+if we run `pwd` after running `cd ..`, we're back in `/home/ubuntu/Desktop/data-shell`:
 
 ~~~
 $ pwd
@@ -555,7 +555,7 @@ $ pwd
 {: .language-bash}
 
 ~~~
-/home/participant/Desktop/data-shell
+/home/ubuntu/Desktop/data-shell
 ~~~
 {: .output}
 
@@ -575,7 +575,7 @@ $ ls -F -a
 
 `-a` stands for "show all";
 it forces `ls` to show us file and directory names that begin with `.`,
-such as `..` (which, if we're in `/home/participant`, refers to the `/home` directory)
+such as `..` (which, if we're in `/home/ubuntu`, refers to the `/home` directory)
 As you can see,
 it also displays another special directory that's just called `.`,
 which means "the current working directory".
@@ -637,12 +637,12 @@ $ pwd
 {: .language-bash}
 
 ~~~
-/home/participant/Desktop/data-shell/data
+/home/ubuntu/Desktop/data-shell/data
 ~~~
 {: .output}
 
 ~~~
-$ cd /home/participant/Desktop/data-shell
+$ cd /home/ubuntu/Desktop/data-shell
 ~~~
 {: .language-bash}
 
@@ -652,9 +652,9 @@ Run `pwd` and `ls -F` to ensure that we're in the directory we expect.
 >
 > The shell interprets the character `~` (tilde) at the start of a path to
 > mean "the current user's home directory". For example, for your home directory
-> ,`/home/participant`, then `~/data` is equivalent to
-> `/home/participant/data`. This only works if it is the first character in the
-> path: `here/there/~/elsewhere` is *not* `here/there/home/participant/elsewhere`.
+> ,`/home/ubuntu`, then `~/data` is equivalent to
+> `/home/ubuntu/data`. This only works if it is the first character in the
+> path: `here/there/~/elsewhere` is *not* `here/there/home/ubuntu/elsewhere`.
 >
 {: .callout}
 
@@ -663,7 +663,7 @@ Run `pwd` and `ls -F` to ensure that we're in the directory we expect.
 > Sometimes file and directory names get too long and it's tedious to have to
 > type the full name for example when moving with `cd`.  We can let the shell do most 
 > of the work > through what is called **tab completion**. 
-> Let's say we are in the `/home/participant/Desktop/data-shell/` and we type:
+> Let's say we are in the `/home/ubuntu/Desktop/data-shell/` and we type:
 >
 > ~~~
 > $ ls nor
@@ -777,7 +777,7 @@ $ pwd
 {: .language-bash}
 
 ~~~
-/home/participant/Desktop/data-shell
+/home/ubuntu/Desktop/data-shell
 ~~~
 {: .output}
 
@@ -1150,14 +1150,14 @@ quotations.txt
 > ## Moving and Copying
 >
 > What is the output of the closing `ls` command in the sequence shown below?
-> You can try the commands starting from `/home/participant/Desktop/data-shell/protein-data`.
+> You can try the commands starting from `/home/ubuntu/Desktop/data-shell/protein-data`.
 > 
 > ~~~
 > $ pwd
 > ~~~
 > {: .language-bash}
 > ~~~
-> /home/participant/Desktop/data-shell/protein-data
+> /home/ubuntu/Desktop/data-shell/protein-data
 > ~~~
 > {: .output}
 > ~~~
@@ -1182,18 +1182,18 @@ quotations.txt
 > 4.   `proteins-saved.dat`
 >
 > > ## Solution
-> > We start in the `/home/participant/protein-data` directory, and create a new folder called `recombine`.
+> > We start in the `/home/ubuntu/protein-data` directory, and create a new folder called `recombine`.
 > > The second line moves (`mv`) the file `proteins.dat` to the new folder (`recombine`).
 > > The third line makes a copy of the file we just moved.  The tricky part here is where the file was
-> > copied to.  Recall that `..` means "go up a level", so the copied file is now in `/home/participant/Desktop/data-shell`.
+> > copied to.  Recall that `..` means "go up a level", so the copied file is now in `/home/ubuntu/Desktop/data-shell`.
 > > Notice that `..` is interpreted with respect to the current working
 > > directory, **not** with respect to the location of the file being copied.
-> > So, the only thing that will show using ls (in `/home/participant/Desktop/data-shell/protein-data`) is the recombine folder.
+> > So, the only thing that will show using ls (in `/home/ubuntu/Desktop/data-shell/protein-data`) is the recombine folder.
 > >
-> > 1. No, see explanation above.  `proteins-saved.dat` is located at `/home/participant/Desktop/data-shell`
+> > 1. No, see explanation above.  `proteins-saved.dat` is located at `/home/ubuntu/Desktop/data-shell`
 > > 2. Yes
-> > 3. No, see explanation above.  `proteins.dat` is located at `/home/participant/Desktop/data-shell/protein-data/recombine`
-> > 4. No, see explanation above.  `proteins-saved.dat` is located at `/home/participant/Desktop/data-shell`
+> > 3. No, see explanation above.  `proteins.dat` is located at `/home/ubuntu/Desktop/data-shell/protein-data/recombine`
+> > 4. No, see explanation above.  `proteins-saved.dat` is located at `/home/ubuntu/Desktop/data-shell`
 > {: .solution}
 {: .challenge}
 
