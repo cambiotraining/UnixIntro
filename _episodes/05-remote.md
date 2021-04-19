@@ -30,41 +30,34 @@ Once our local client is connected to the remote server, everything we type into
 SSH is a protocol which allows us to send secure encrypted information across an unsecured network, like the internet. The underlying protocol supports a number of commands we can use to move information of different types in different ways. The simplest and most straightforward is the `ssh` command which facilitates a remote login session connecting our local user and shell to any remote user we have permission to access.
 
 ~~~
-$ ssh sshuser@127.0.0.1 -p 8890
+$ ssh ubuntu@remote-machine
 ~~~
 {: .language-bash}
 
-The first argument specifies the location of the remote machine (by IP address or a URL) as well as the user we want to connect to seperated by an `@` sign. For the purpose of this course we've set up a container on your local machine for you to connect to the IP address `127.0.0.1` is actually reserved for your local computer.
-
-We also specify the port to look for the ssh server on with `-p 8890`. Most network based services listen for connections on a specific numbered port for ssh the default is 22. However, a common security measure is to change the port ssh is listening on to avoid opportunistic connections. In our case we are using 8890 to avoid conflict with the existing ssh server used on your computer for administration.
+The first argument specifies the location of the remote machine (by IP address or a URL) as well as the user we want to connect to seperated by an `@` sign. For the purpose of this course we've set up a container on our cluster for you to connect to the address `remote-machine` is actually a special kind of URL that only your computer will understand. In real life this would normally be an address on the internet which can be access from anywhere or at least an institutional local area network. 
 
 ~~~
-The authenticity of host '[127.0.0.1]:8890 ([127.0.0.1]:8890)' can't be established.
-ECDSA key fingerprint is SHA256:v9X5DCaGtI0mSF79Krmhx3g8AbMQqVAhg6hHEjdexho.
-Are you sure you want to continue connecting (yes/no)? yes
+The authenticity of host '[192.168.1.59]:2231 ([192.168.1.59]:2231)' can't be established.
+RSA key fingerprint is SHA256:4X1kUMDOG021U52XDL2U56GFIyC+S5koImofnTHvALk.
+Are you sure you want to continue connecting (yes/no)?
 ~~~
 {: .output}
 
 When you connect to a computer for the first time you should see a warning like the one above. This signifies that the computer is trying to prove it's identity by sending a fingerprint which relates to a key that only it knows. Depending on the security of the server you are connecting to they might distribute the fingerprint ahead of time for you to compare and advise you to double check it in case it changes at a later log on. In our case it is safe to type `yes` .
 
 ~~~
-sshuser@127.0.0.1's password: ********
+ubuntu@192.168.1.59's password: ********
 ~~~
 {: .language-bash}
 
-Now you are prompted for a password. In an example of terribly bad practice our password is the same as our username `sshuser` .
+Now you are prompted for a password. In an example of terribly bad practice our password is the same as our username `ubuntu` .
 
 ~~~
-    sshuser@7a7882cd4d46:~$
+    ubuntu@remote_machine:~$
 ~~~
 {: .language-bash}
 
-You should now have a prompt very similar to the one you started with but with a new username and computer hostname. Take a look around with the `ls` command and you should see that your new session has its own completely independent filesystem. Unfortunately it's rather empty. Let's change that, but first we need to go back to our original computer's shell. User `Ctrl+D` on an empty command prompt to log out.
-
-~~~
-$ ls -la /home
-~~~
-{: .language-bash}
+You should now have a prompt very similar to the one you started with but with a new username and computer hostname. Take a look around with the `ls` command and you should see that your new session has its own completely independent filesystem. Unfortunately None of the files are particularly relevant to us. Let's change that, but first we need to go back to our original computer's shell. Use the key combination `Ctrl+D` on an empty command prompt to log out.
 
 ## Moving files
 
@@ -74,18 +67,11 @@ Making sure we're in the `data-shell` directory let's copy the notes.txt file to
 
 ~~~
 $ cd ~/Desktop/data-shell
-$ scp -P 8890 notes.txt sshuser@127.0.0.1:/home/sshuser
+$ scp notes.txt ubuntu@remote-machine:/home/ubuntu
 ~~~
 {: .language-bash}
 
 The format of the command should be quite familiar when comparing to the `cp` command for local copying. The last two arguments specify the source and the destination of the copy respectively. The difference comes in that any remote locations involved in the copy must be preceded by the `username@IP` syntax used in the `ssh` command previously. The first half tells scp how to access the computer and the second half tells it where in the filesystem to operate, these two segments are separated by a `:` .
-
-Note that scp uses a capital `-P` to specify the port number
-
-~~~
-$ ls lengths.txt
-~~~
-{: .language-bash}
 
 ~~~
 notes.txt                                     100%   86   152.8KB/s   00:00
@@ -94,10 +80,10 @@ notes.txt                                     100%   86   152.8KB/s   00:00
 
 Now it looks like we've copied the file, but we should check.
 
-Establishing a whole ssh session just to run one command might be a bit cumbersome. Instead we can tell ssh all the commands it needs to run at the same time we connect by adding an extra argument to the end. Ssh will automatically disconnect after it completes the full command string.
+Establishing a whole ssh session just to run one command might be a bit cumbersome. Instead we can tell ssh all the commands it needs to run at the same time we connect by adding an extra argument to the end. ssh will automatically disconnect after it completes the full command string.
 
 ~~~
-$ ssh -p 8890 sshuser@127.0.0.1 "ls /home/sshuser"
+$ ssh ubuntu@remote-machine "ls /home/ubuntu/*.txt"
 ~~~
 {: .language-bash}
 
@@ -113,21 +99,21 @@ Success!
 > Using two commands we've uploaded a file to our server and checked it was there
 >
 > ~~~
-> $ scp -P 8890 notes.txt sshuser@127.0.0.1:/home/sshuser
-> $ ssh -p 8890 sshuser@127.0.0.1 "ls /home/sshuser"
+> $ scp notes.txt ubuntu@remote-machine:/home/ubuntu
+> $ ssh ubuntu@remote-machine "ls /home/ubuntu/*.txt"
 > ~~~
 > {: .language-bash}
 > 
 > More often we might want to have the server do some work on our files and then get them back. We can use exactly the same syntax structure with different arguments. 
 >
-> Try and make a change to notes.txt (perhaps add some text to the end with `echo` and `>>`) in the remote location and then retrieve the changed file. Remember to change the name of the file as you already have a notes.txt in your directory.
+> Try and make a change to notes.txt (perhaps add some text to the end with the `echo` command and `>>`) in the remote location and then retrieve the changed file. Remember to change the name of the file as you already have a notes.txt in your directory.
 >
 > If you're having trouble check `man scp` for more information about how to structure the command
 >
 > > ## Solution
 > > ~~~
-> > ssh -p 8890 sshuser@127.0.0.1 "echo all done >> notes.txt"
-> > scp -P 8890 sshuser@127.0.0.1:notes.txt changed_notes.txt
+> > ssh ubuntu@remote-machine "echo all done >> notes.txt"
+> > scp ubuntu@remote-machine:notes.txt changed_notes.txt
 > > ~~~
 > {: .solution}
 {: .challenge}
@@ -137,29 +123,27 @@ Success!
 Sometimes we need to manage a large number of files across two locations, often maintaining a specific directory structure. `scp` can handle this with it's `-r` flag. Just like `cp` this puts the command in recursive mode allowing it to copy entire directories of files
 
 ~~~
-$ scp -r -P 8890 workflow/ sshuser@127.0.0.1:/home/sshuser
+$ scp -r ubuntu@remote-machine:/home/ubuntu/Course_Materials/salmon .
 ~~~
 {: .language-bash}
 
 ~~~
-.run_alignment.sh.swp                         100%   12KB   7.5MB/s   00:00    
-ecoli_rel606.fasta.amb                        100%   12    12.0KB/s   00:00    
-ecoli_rel606.fasta.rbwt                       100% 1696KB 162.6MB/s   00:00    
-ecoli_rel606.fasta.rpac                       100% 1130KB 312.5MB/s   00:00    
-ecoli_rel606.fasta.ann                        100%   87   431.4KB/s   00:00    
-ecoli_rel606.fasta.bwt                        100% 1696KB 325.9MB/s   00:00    
-ecoli_rel606.fasta.rsa                        100%  565KB 289.3MB/s   00:00    
-ecoli_rel606.fasta                            100% 4578KB 331.4MB/s   00:00    
-ecoli_rel606.fasta.sa                         100%  565KB 294.5MB/s   00:00    
-ecoli_rel606.fasta.pac                        100% 1130KB 309.9MB/s   00:00    
-ecoli_rel606.fasta.fai                        100%   29    78.3KB/s   00:00    
-run_alignment.sh                              100% 1143     4.1MB/s   00:00    
-SRR000011.fastq                               100%  128KB 223.8MB/s   00:00    
-SRR000013.fastq                               100%  128KB 273.4MB/s   00:00    
-SRR000016.fastq                               100%  140KB 188.2MB/s   00:00    
-SRR000012.fastq                               100%  128KB 162.7MB/s   00:00    
-SRR000015.fastq                               100%  128KB 170.5MB/s   00:00    
-SRR000014.fastq                               100%  139KB 226.5MB/s   00:00 
+meta_info.json                                100% 1857     1.6MB/s   00:00    
+observed_bias_3p.gz                           100%   54    53.7KB/s   00:00    
+obs_gc.gz                                     100%  243   577.6KB/s   00:00    
+expected_bias.gz                              100%   89   226.6KB/s   00:00    
+observed_bias.gz                              100%   54   172.6KB/s   00:00    
+ambig_info.tsv                                100%  618KB 274.6MB/s   00:00    
+exp_gc.gz                                     100%  249     2.2MB/s   00:00    
+fld.gz                                        100%  477     6.8MB/s   00:00    
+flenDist.txt                                  100%   11KB  86.4MB/s   00:00    
+salmon_quant.log                              100% 5193    53.8MB/s   00:00    
+quant.sf                                      100% 5682KB 314.1MB/s   00:00    
+cmd_info.json                                 100%  290     3.5MB/s   00:00    
+lib_format_counts.json                        100%  597     3.8MB/s   00:00    
+meta_info.json                                100% 1857     9.1MB/s   00:00    
+observed_bias_3p.gz                           100%   54   349.0KB/s   00:00    
+obs_gc.gz                                     100%  237     3.1MB/s   00:00    
 ~~~
 {: .output}
 
@@ -171,33 +155,19 @@ For this scenario `rsync` can be an excellent tool.
 
 ## rsync
 
-First lets add some new files to our `workflow` directory using the `touch` command. This command does nothing but create an empty file or update the timestamp of an existing file.
+First lets add some new files to our `salmon` directory using the `touch` command. This command does nothing but create an empty file or update the timestamp of an existing file.
 
 ~~~
-$ touch workflow/newfile1 workflow/newfile2 workflow/newfile3
-~~~
-{: .language-bash}
-
-`rsync` is already set up on our local computer, but as the remote server is a fresh install we'll need to add it (although you can generally expect it to be installed as default).
-
-We need to first ssh to the remote server and then issue a command to add `rsync` as follows.
-
-~~~
-$ ssh -p 8890 sshuser@127.0.0.1
-$ sudo apt -y install rsync
+$ touch salmon/newfile1 salmon/newfile2 salmon/newfile3
 ~~~
 {: .language-bash}
 
-Finally Ctrl+D to exit.
-
-Now we have everything set up we can issue the `rsync` to sync our two directories
+Now we have everything set up we can issue the `rsync` command to sync our two directories
 
 ~~~
-$ rsync -e 'ssh -p 8890' -avz workflow sshuser@127.0.0.1:/home/sshuser/workflow
+$ rsync -avz salmon ubuntu@remote-machine:/home/ubuntu/Course_Materials/salmon
 ~~~
 {: .language-bash}
-
-The `-e` flag allows us to specify the protocol rsync uses to operate. We can use this to have it work over the same ssh connection that all of the previous commands have.
 
 The `-v` flag stands for `verbose` and outputs a lot of status information during the transfer. This is helpful when running the command interactively but should generally be removed when writing scripts.
 
@@ -214,14 +184,14 @@ $ man rsync
 
 `--exclude` and `--include` can be used to  more granularly control which files are copied
 
-Finally `--delete` is very useful when you want to maintain an exact copy of the source including the deletion of files only present in the destination. Let's tidy up our `workflow` directory with this option.
+Finally `--delete` is very useful when you want to maintain an exact copy of the source including the deletion of files only present in the destination. Let's tidy up our `salmon` directory with this option.
 
 > ## How to remove files using rsync --delete
 >
 > First we should manually delete our local copies of the empty files we created.
 >
 > ~~~
-> $ rm workflow/newfile*
+> $ rm salmon/newfile*
 > ~~~
 >{: .language-bash}
 >
@@ -234,31 +204,31 @@ Finally `--delete` is very useful when you want to maintain an exact copy of the
 >
 > > ## Solution
 > > ~~~
-> > rsync -e 'ssh -p 8890' -avz --delete ../workflow sshuser@127.0.0.1:/home/sshuser/workflow
+> > rsync -avz --delete salmon ubuntu@remote-machine:/home/ubuntu/salmon
 > > ~~~
 > {: .solution}
 {: .challenge}
 
 ## SshFs
 
-Sshfs is another way of using the same ssh protocol to share files in a slightly different way. This software allows us to connect the file system of one machine with the file system of another using a "mount point". Let's start by making a directory in `/home/participant/Desktop/data-shell` to act as this mount point. Convention tells us to call it `mnt`.
+Sshfs is another way of using the same ssh protocol to share files in a slightly different way. This software allows us to connect the file system of one machine with the file system of another using a "mount point". Let's start by making a directory in `/home/ubuntu/Desktop/data-shell` to act as this mount point. Convention tells us to call it `mnt`.
 
 ~~~
-$ mkdir /home/participant/Desktop/data-shell/mnt
+$ mkdir /home/ubuntu/Desktop/data-shell/mnt
 ~~~
 {: .language-bash}
 
 Now we can run the `sshfs` command
 
 ~~~
-$ sshfs sshuser@127.0.0.1:/home/sshuser /home/participant/Desktop/data-shell/mnt/ -p 8890
+$ sshfs ubuntu@remote-machine:/home/ubuntu /home/ubuntu/Desktop/data-shell/mnt/
 ~~~
 {: .language-bash}
 
 It looks fairly similar to the previous copying commands. The first argument is a remote source, the second argument is a local destination. The difference is that now whenever we interact with our local mount point it will be as if we were interacting with the remote filesystem starting at the directory we specified `/home/sshuser`.
 
 ~~~
-$ cd /home/participant/Desktop/data-shell/mnt/ 
+$ cd /home/ubuntu/Desktop/data-shell/mnt/ 
 $ ls -l
 ~~~
 {: .language-bash}
@@ -268,7 +238,7 @@ total 8
 -rw-r--r-- 1 brewmaster brewmaster    0 Sep 30 07:07 file1
 -rw-r--r-- 1 brewmaster brewmaster   95 Sep 30 05:36 notes.txt
 -rw-r--r-- 1 brewmaster brewmaster    0 Sep 30 08:05 test
-drwxr-xr-x 1 brewmaster brewmaster 4096 Sep 30 07:30 workflow
+drwxr-xr-x 1 brewmaster brewmaster 4096 Sep 30 07:30 salmon
 ~~~
 {: .output}
 
